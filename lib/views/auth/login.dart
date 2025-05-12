@@ -8,6 +8,7 @@ class Login extends StatelessWidget {
   final TextEditingController passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 final RxBool isPasswordHidden = true.obs;
+
   Login({super.key});
 final Authcontroller authController = Get.put(Authcontroller());
   @override

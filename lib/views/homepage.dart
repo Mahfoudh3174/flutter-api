@@ -1,11 +1,11 @@
-
 import 'package:demo/controllers/auth_controller.dart';
 import 'package:demo/controllers/client_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:demo/wigets/drawer.dart';
+
 class Homepage extends StatelessWidget {
-  final Clientscontroller apiCtrl = Get.put(Clientscontroller());
+  final Clientscontroller clientscontroller = Get.put(Clientscontroller());
   final Authcontroller authCtrl = Get.put(Authcontroller());
 
   Homepage({super.key});
@@ -13,9 +13,9 @@ class Homepage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer:MainDrawer(
+      drawer: MainDrawer(
         userName: authCtrl.user_name.value,
-        
+
         userEmail: authCtrl.user_email.value,
         onLogoutPressed: () {
           // Handle logout action
@@ -31,18 +31,23 @@ class Homepage extends StatelessWidget {
             },
           ),
         ],
-        title: Text("GetX API Demo")),
+        title: Text("GetX API Demo"),
+      ),
       persistentFooterButtons: [
-        ElevatedButton.icon(onPressed: ()=>Get.toNamed('/login'), label: Text('login'))
+        ElevatedButton.icon(
+          onPressed: () => clientscontroller.fetchClients(),
+          icon: Icon(Icons.refresh),
+          label: Text('Refresh'),
+        ),
       ],
-      body: Obx( () {
-        if (apiCtrl.isLoading.value) {
+      body: Obx(() {
+        if (clientscontroller.isLoading.value) {
           return Center(child: CircularProgressIndicator());
         } else {
           return ListView.builder(
-            itemCount: apiCtrl.clients.length,
+            itemCount: clientscontroller.clients.length,
             itemBuilder: (context, index) {
-              final client = apiCtrl.clients[index];
+              final client = clientscontroller.clients[index];
               return ListTile(
                 title: Text(client.name),
                 subtitle: Text(client.phone),
@@ -54,7 +59,7 @@ class Homepage extends StatelessWidget {
                       content: Text('delete ${client.name} ?'),
                       confirm: TextButton(
                         onPressed: () {
-                          apiCtrl.deleteClient(id: client.id);
+                          clientscontroller.deleteClient(id: client.id);
                           Get.back();
                         },
                         child: Text('yes'),
@@ -73,8 +78,8 @@ class Homepage extends StatelessWidget {
         }
       }),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => apiCtrl.fetchClients(), // Refresh data
-        child: Icon(Icons.refresh),
+        onPressed: () => Get.toNamed('create-client'), // Refresh data
+        child: Icon(Icons.add),
       ),
     );
   }
