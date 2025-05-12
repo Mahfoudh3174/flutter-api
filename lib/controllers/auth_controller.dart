@@ -1,43 +1,64 @@
-
+import 'package:demo/services/stored_service.dart';
 import 'package:get/get.dart';
 import 'package:demo/models/user.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:demo/controllers/client_controller.dart';
+import 'package:demo/routes/web.dart';
 
 class Authcontroller extends GetxController {
-    final RxBool isLoggedIn = false.obs;
-final storage=FlutterSecureStorage();
-  final RxString user_name = ''.obs;
-  final RxString user_email = ''.obs;
-  final RxString user_phone = ''.obs;
+  final RxBool isLoggedIn = false.obs;
+
+  final storage = Get.find<StorageService>();
   Future<void> login(String email, String password) async {
     final response = await http.post(
       Uri.parse('http://192.168.100.13:8000/api/login'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
+        'Accept': 'application/json',
       },
       body: jsonEncode(<String, String>{'email': email, 'password': password}),
     );
 
-    print(response.statusCode);
-
     if (response.statusCode == 200) {
       // If the server returns an OK response, parse the JSON.
       var data = jsonDecode(response.body);
-      print(data['user']);
+
       User user = User.fromJson(data['user']);
       String token = data['token'];
       print(token);
-      storage.write(key: 'token', value: token);
-      user_name.value = user.name;
-      user_email.value = user.email;
-      user_phone.value = user.phone;
+
+      await storage.saveToken(token);
+
+      await storage.saveUser(user);
       Get.snackbar('Login Successful', 'Welcome ${user.name}');
-      Get.offAllNamed('/'); // Navigate to the home page
+      final clientController = Get.find<Clientscontroller>();
+      await clientController.fetchClients();
+      Get.offAllNamed(RouteClass.getHomeRoute()); // Navigate to the home page
     } else {
       // If the server did not return a 200 OK response, throw an exception.
       Get.snackbar('Login Failed', 'Invalid email or password');
+    }
+  }
+
+  Future<void> logout() async {
+    final token = storage.getToken();
+    print('$token is not exist oe what');
+    final response = await http.post(
+      Uri.parse('http://192.168.100.13:8000/api/logout'),
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      // If the server returns an OK response, parse the JSON.
+      await storage.clearToken();
+      Get.offAllNamed(RouteClass.getLoginRoute()); // Navigate to the login page
+    } else {
+      print(response.statusCode);
+
+      // If the server did not return a 200 OK response, throw an exception.
+      Get.snackbar('Logout Failed', 'Failed to logout');
     }
   }
 }

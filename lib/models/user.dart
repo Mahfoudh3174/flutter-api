@@ -1,18 +1,11 @@
 class User {
   String email;
   String name;
-  String phone;
 
 
-  User({
-    required this.name,
-    required this.phone,
-    required this.email,
-    
-  });
-
+  User({required this.name, required this.email});
+  Map<String, dynamic> toJson() => {'name': name, 'email': email};
   User.fromJson(Map<String, dynamic> json)
     : email = json['email'],
-      name = json['name'],
-      phone = json['number'];
+      name = json['name'];
 }

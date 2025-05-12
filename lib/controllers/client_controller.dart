@@ -1,22 +1,32 @@
 import 'dart:convert';
 
 import 'package:demo/models/Client.dart';
+import 'package:demo/services/stored_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import 'package:demo/routes/web.dart';
 
 class Clientscontroller extends GetxController {
   var clients = <Client>[].obs;
   RxBool isLoading = false.obs;
-  final storage = FlutterSecureStorage();
+  final storage =Get.find<StorageService>();
   @override
   void onInit() {
     fetchClients();
     super.onInit();
   }
 
+
   Future<void> fetchClients() async {
+
+
     try {
+      final token =  storage.getToken();
+      if(token ==null){
+        print('token is null client controller');
+        return;
+      }
       isLoading.value = true;
       final response = await http.get(
         Uri.parse(
@@ -24,7 +34,8 @@ class Clientscontroller extends GetxController {
            
           ),
         headers: {
-          'Authorization': 'Bearer ${await storage.read(key: 'token')}',
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
       );
@@ -46,7 +57,8 @@ class Clientscontroller extends GetxController {
     final response = await http.delete(
       Uri.parse('http://192.168.100.13:8000/api/clients/$id'),
         headers: {
-          'Authorization': 'Bearer ${await storage.read(key: 'token')}',
+          'Authorization': 'Bearer ${storage.getToken()}',
+          'Content-Type': 'application/json',
           'Accept': 'application/json',
         }
     );
@@ -64,7 +76,7 @@ class Clientscontroller extends GetxController {
     required String phone,
   }) async {
     try {
-      final token = await storage.read(key: 'token');
+      final token = storage.getToken();
 
       if (token == null) {
         Get.snackbar('Error', 'Authentication token not found');
@@ -99,4 +111,5 @@ class Clientscontroller extends GetxController {
       Get.snackbar('Exception', 'Something went wrong: $e');
     }
   }
+
 }
