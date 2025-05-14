@@ -1,19 +1,23 @@
+import 'package:demo/controllers/auth_controller.dart';
+import 'package:demo/services/stored_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:demo/models/noification.dart';
 import 'package:demo/controllers/notification_controller.dart';
+import 'package:demo/wigets/drawer.dart';
 
 class NotificationPage extends StatelessWidget {
   final NotificationController notificationController =
       Get.find<NotificationController>();
-
+  final StorageService storageService = Get.find<StorageService>();
   NotificationPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       appBar: _buildAppBar(),
       body: _buildNotificationList(),
       floatingActionButton: _buildRefreshButton(),
@@ -22,6 +26,7 @@ class NotificationPage extends StatelessWidget {
 
   AppBar _buildAppBar() {
     return AppBar(
+      
       title: Obx(
         () => Text(
           'Notifications ${notificationController.unreadCount.value > 0 ? '(${notificationController.unreadCount.value})' : ''}',

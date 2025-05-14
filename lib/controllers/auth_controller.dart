@@ -33,7 +33,7 @@ class Authcontroller extends GetxController {
 
       await storage.saveUser(user);
       Get.snackbar('Login Successful', 'Welcome ${user.name}');
-      final clientController = Get.find<Clientscontroller>();
+      final clientController = Get.put(Clientscontroller());
       await clientController.fetchClients();
       Get.offAllNamed(RouteClass.getHomeRoute()); // Navigate to the home page
     } else {

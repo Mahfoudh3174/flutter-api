@@ -8,34 +8,27 @@ import 'package:demo/wigets/drawer.dart';
 import 'package:demo/routes/web.dart';
 
 class HomePage extends StatelessWidget {
-  final Clientscontroller clientController = Get.find<Clientscontroller>();
-  final Authcontroller authController = Get.put(Authcontroller());
-  final NotificationController notificationController = 
-      Get.put(NotificationController());
-  final storage=Get.find<StorageService>();
+  final Clientscontroller clientController = Get.find();
+
+  final NotificationController notificationController = Get.put(
+    NotificationController(),
+  );
+  final storage = Get.find<StorageService>();
   HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       drawer: MainDrawer(
         userName: storage.getUser()!.name,
         userEmail: storage.getUser()!.email,
-        onLogoutPressed: () async {
-          await authController.logout();
-        },
       ),
       appBar: AppBar(
         title: const Text("Client Management"),
         backgroundColor: Colors.blue.shade800,
-        actions: [
-          _buildNotificationIcon(),
-        ],
+        actions: [_buildNotificationIcon()],
       ),
-      persistentFooterButtons: [
-        _buildRefreshButton(),
-      ],
+    
       body: SafeArea(child: _buildBody()),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Get.toNamed(RouteClass.getCreateClientRoute()),
@@ -67,10 +60,7 @@ class HomePage extends StatelessWidget {
                   ),
                   child: Text(
                     count.toString(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                    ),
+                    style: const TextStyle(color: Colors.white, fontSize: 10),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -83,72 +73,85 @@ class HomePage extends StatelessWidget {
     });
   }
 
-  Widget _buildRefreshButton() {
-    return ElevatedButton.icon(
-      onPressed: () async {
-        await clientController.fetchClients();
-        await notificationController.fetchNotifications();
-      },
-      icon: const Icon(Icons.refresh),
-      label: const Text('Refresh Data'),
-    );
-  }
 
   Widget _buildBody() {
-    return Obx(() {
-      if (clientController.isLoading.value) {
-        return const Center(child: CircularProgressIndicator());
-      }
+    return RefreshIndicator(
+      onRefresh: clientController.fetchClients,
+      child: Obx(() {
+        if (clientController.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-      if (clientController.clients.isEmpty) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.people_outline, size: 60, color: Colors.grey),
-              const SizedBox(height: 16),
-              Text(
-                'No Clients Found',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Add your first client using the + button',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-            ],
-          ),
-        );
-      }
-
-      return ListView.builder(
-        itemCount: clientController.clients.length,
-        itemBuilder: (context, index) {
-          final client = clientController.clients[index];
-          return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: Colors.blue.shade100,
-                child: Text(client.name[0].toUpperCase()),
-              ),
-              title: Text(
-                client.name,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(client.phone),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: () => _showDeleteDialog(client.id, client.name),
-              ),
-              onTap: () {
-                // Optional: Add navigation to client details
-              },
+        if (clientController.clients.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.people_outline, size: 60, color: Colors.grey),
+                const SizedBox(height: 16),
+                Text(
+                  'No Clients Found',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Add your first client using the + button',
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+              ],
             ),
           );
-        },
-      );
-    });
+        }
+
+        return ListView.builder(
+          itemCount: clientController.clients.length,
+          itemBuilder: (context, index) {
+            final client = clientController.clients[index];
+            return Card(
+              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Colors.blue.shade100,
+                  child: Text(client.name[0].toUpperCase()),
+                ),
+                title: Text(
+                  client.name,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(client.phone),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.blue),
+                      onPressed: () {
+                       Map<String, dynamic> singleclient = {
+                          'id': client.id,
+                          'name': client.name,
+                          'phone': client.phone,
+                        };
+                        Get.toNamed(
+                          RouteClass.getEditClientRoute(),
+                          arguments: singleclient,
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed:
+                          () => _showDeleteDialog(client.id, client.name),
+                    ),
+                  ],
+                ),
+                onTap: () {
+                  // Empty function for viewing details
+                },
+              ),
+            );
+          },
+        );
+      }),
+    );
   }
 
   void _showDeleteDialog(String clientId, String clientName) {

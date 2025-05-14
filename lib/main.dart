@@ -1,4 +1,5 @@
 
+import 'package:demo/controllers/auth_controller.dart';
 import 'package:demo/controllers/client_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:demo/routes/web.dart';
@@ -9,12 +10,14 @@ void main() async {
 
   // Initialize and register the StorageService
   await Get.putAsync(() => StorageService().init());
-   Get.put(Clientscontroller());
+    
   
   runApp(MyApp());
 }
 class MyApp extends StatelessWidget {
    MyApp({super.key});
+
+
   
 
   @override

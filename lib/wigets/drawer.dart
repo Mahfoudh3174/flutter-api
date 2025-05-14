@@ -1,17 +1,22 @@
+import 'package:demo/controllers/auth_controller.dart';
+import 'package:demo/routes/web.dart';
+import 'package:demo/services/stored_service.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class MainDrawer extends StatelessWidget {
+  final authController = Get.find<Authcontroller>();
   final String userName;
   
   final String userEmail;
-  final VoidCallback onLogoutPressed;
+  
 
-  const MainDrawer({
+   MainDrawer({
     super.key,
     required this.userName,
     
     required this.userEmail,
-    required this.onLogoutPressed,
+    
   });
 
   @override
@@ -43,11 +48,7 @@ class MainDrawer extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               color: Theme.of(context).primaryColor,
-              image: const DecorationImage(
-                image: AssetImage('images/bg.jpg'), // Optional
-                fit: BoxFit.cover,
-                opacity: 0.7,
-              ),
+              
             ),
           ),
 
@@ -60,7 +61,7 @@ class MainDrawer extends StatelessWidget {
                   leading: const Icon(Icons.home),
                   title: const Text('Home'),
                   onTap: () {
-                    Navigator.pop(context);
+                    Get.offAllNamed(RouteClass.getHomeRoute());
                     // Navigate to home
                   },
                 ),
@@ -112,7 +113,9 @@ class MainDrawer extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onPressed: onLogoutPressed,
+                onPressed: () async{
+                  await authController.logout();
+                },
               ),
             ),
           ),
