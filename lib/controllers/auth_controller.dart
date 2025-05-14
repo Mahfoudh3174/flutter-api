@@ -9,9 +9,11 @@ import 'package:demo/routes/web.dart';
 
 class Authcontroller extends GetxController {
   final RxBool isLoggedIn = false.obs;
+  final RxBool isLoading = false.obs;
 
   final storage = Get.find<StorageService>();
   Future<void> login(String email, String password) async {
+    isLoading.value = true;
     final response = await http.post(
       Uri.parse('http://192.168.100.13:8000/api/login'),
       headers: <String, String>{
@@ -32,7 +34,7 @@ class Authcontroller extends GetxController {
       await storage.saveToken(token);
 
       await storage.saveUser(user);
-      Get.snackbar('Login Successful', 'Welcome ${user.name}');
+      
       final clientController = Get.put(Clientscontroller());
       await clientController.fetchClients();
       Get.offAllNamed(RouteClass.getHomeRoute()); // Navigate to the home page
@@ -40,6 +42,7 @@ class Authcontroller extends GetxController {
       // If the server did not return a 200 OK response, throw an exception.
       Get.snackbar('Login Failed', 'Invalid email or password');
     }
+    isLoading.value = false;
   }
 
   Future<void> logout() async {

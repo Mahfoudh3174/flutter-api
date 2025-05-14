@@ -4,6 +4,7 @@ import 'package:demo/services/auth_binding.dart';
 import 'package:demo/services/notification_binding.dart';
 import 'package:demo/views/auth/login.dart';
 import 'package:demo/views/clients/create.dart';
+import 'package:demo/views/clients/show.dart';
 import 'package:demo/views/clients/edit.dart';
 import 'package:demo/views/homepage.dart';
 import 'package:demo/views/notifications/index.dart';
@@ -17,6 +18,7 @@ class RouteClass{
   static const String createClient = '/create-client';
   static const String notifications = '/notifications';
   static const String editClient='/edit-client';
+  static const String showClient='/show-client';
 
   static String getHomeRoute() => home;
   static String getLoginRoute() => login; 
@@ -24,17 +26,19 @@ class RouteClass{
   static String getNotificationsRoute() => notifications;
   static String getCreateClientRoute() => createClient;
   static String getEditClientRoute() => editClient;
+  static String getShowClientRoute() => showClient;
 
   static List<GetPage> getPages() {
     return [
       GetPage(name: home, page: () => HomePage(),middlewares: [SanctumAuthMiddleware()],bindings:[AuthBinding(),ClientBinding(),NotificationBinding()] ),
-      GetPage(name: login, page: () => Login(),middlewares: [SanctumAuthMiddleware()]),
+      GetPage(name: login, page: () => Login(),middlewares: [SanctumAuthMiddleware()],bindings:[AuthBinding()] ),
       GetPage(name: createClient, page: () => CreateClient(),middlewares: [SanctumAuthMiddleware()]),
       GetPage(name: notifications, page: () => NotificationPage(),middlewares: [SanctumAuthMiddleware()] ),
       GetPage(name: editClient, page: () {
     final client = Get.arguments as Map<String, dynamic>;
     return EditClientPage(client: client);
   },middlewares: [SanctumAuthMiddleware()] ),
+      GetPage(name: showClient, page: ()=> ClientDetailsPage(),middlewares: [SanctumAuthMiddleware()] ),
     ];
   }
 }

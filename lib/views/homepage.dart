@@ -108,9 +108,12 @@ class HomePage extends StatelessWidget {
           itemBuilder: (context, index) {
             final client = clientController.clients[index];
             return Card(
+              
               margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: ListTile(
+                
                 leading: CircleAvatar(
+                  
                   backgroundColor: Colors.blue.shade100,
                   child: Text(client.name[0].toUpperCase()),
                 ),

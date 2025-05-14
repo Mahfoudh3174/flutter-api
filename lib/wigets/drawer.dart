@@ -67,9 +67,9 @@ class MainDrawer extends StatelessWidget {
                 ),
                 ListTile(
                   leading: const Icon(Icons.person),
-                  title: const Text('Profile'),
+                  title: const Text('client details'),
                   onTap: () {
-                    Navigator.pop(context);
+                    Get.toNamed(RouteClass.getShowClientRoute());
                     // Navigate to profile
                   },
                 ),

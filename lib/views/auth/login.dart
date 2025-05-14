@@ -8,14 +8,13 @@ class Login extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-final RxBool isPasswordHidden = true.obs;
+  final RxBool isPasswordHidden = true.obs;
 
   Login({super.key});
-final Authcontroller authController = Get.put(Authcontroller());
+  final Authcontroller authController = Get.find();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       backgroundColor: Colors.grey[50],
       body: SafeArea(
         child: SingleChildScrollView(
@@ -36,14 +35,24 @@ final Authcontroller authController = Get.put(Authcontroller());
                 ),
                 const SizedBox(height: 40),
                 // Welcome text
-                Text(
-                  'Welcome Back',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue[800],
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+                Obx(() {
+  // Show loading indicator if authentication is in progress
+  if (authController.isLoading.value) {
+    return const Center(
+      child: CircularProgressIndicator(),
+    );
+  }
+  
+  // Show welcome message when not loading
+  return Text(
+    'Welcome Back',
+    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+      fontWeight: FontWeight.bold,
+      color: Colors.blue[800],
+    ),
+    textAlign: TextAlign.center,
+  );
+}),
                 const SizedBox(height: 8),
                 Text(
                   'Sign in to continue',
@@ -64,7 +73,10 @@ final Authcontroller authController = Get.put(Authcontroller());
                         decoration: InputDecoration(
                           labelText: 'Email',
                           labelStyle: TextStyle(color: Colors.grey[600]),
-                          prefixIcon: Icon(Icons.email, color: Colors.grey[600]),
+                          prefixIcon: Icon(
+                            Icons.email,
+                            color: Colors.grey[600],
+                          ),
                           filled: true,
                           fillColor: Colors.white,
                           border: OutlineInputBorder(
@@ -94,13 +106,17 @@ final Authcontroller authController = Get.put(Authcontroller());
                         },
                       ),
                       const SizedBox(height: 20),
-                      Obx(()=>   TextFormField(
+                      Obx(
+                        () => TextFormField(
                           controller: passwordController,
                           obscureText: isPasswordHidden.value,
                           decoration: InputDecoration(
                             labelText: 'Password',
                             labelStyle: TextStyle(color: Colors.grey[600]),
-                            prefixIcon: Icon(Icons.lock, color: Colors.grey[600]),
+                            prefixIcon: Icon(
+                              Icons.lock,
+                              color: Colors.grey[600],
+                            ),
                             filled: true,
                             fillColor: Colors.white,
                             border: OutlineInputBorder(
@@ -119,10 +135,16 @@ final Authcontroller authController = Get.put(Authcontroller());
                               ),
                             ),
                             suffixIcon: IconButton(
-                              icon: Obx(() => isPasswordHidden.value? const Icon(Icons.visibility_off) : const Icon(Icons.visibility)),
+                              icon: Obx(
+                                () =>
+                                    isPasswordHidden.value
+                                        ? const Icon(Icons.visibility_off)
+                                        : const Icon(Icons.visibility),
+                              ),
                               color: Colors.grey[600],
                               onPressed: () {
-                                isPasswordHidden.value = !isPasswordHidden.value;
+                                isPasswordHidden.value =
+                                    !isPasswordHidden.value;
                               },
                             ),
                           ),
@@ -130,7 +152,7 @@ final Authcontroller authController = Get.put(Authcontroller());
                             if (value == null || value.isEmpty) {
                               return 'Please enter your password';
                             }
-                            
+
                             return null;
                           },
                         ),
@@ -151,54 +173,22 @@ final Authcontroller authController = Get.put(Authcontroller());
                       ),
                       const SizedBox(height: 24),
                       // Login button
-                      SpecialButton(text: 'login', onPress: (){
-                        if (_formKey.currentState!.validate()) {
-                          authController.login(emailController.text, passwordController.text);
-                        }
-                      }, color: Colors.blue, textColor: Colors.white),
+                      SpecialButton(
+                        text: 'login',
+                        onPress: () async {
+                          if (_formKey.currentState!.validate()) {
+                            await authController.login(
+                              emailController.text,
+                              passwordController.text,
+                            );
+                          }
+                        },
+                        color: Colors.blue,
+                        textColor: Colors.white,
+                      ),
                       const SizedBox(height: 24),
                       // Divider with "or"
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Divider(color: Colors.grey[400], thickness: 1),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: Text(
-                              'OR',
-                              style: TextStyle(color: Colors.grey[600]),
-                            ),
-                          ),
-                          Expanded(
-                            child: Divider(color: Colors.grey[400], thickness: 1),
-                          ),
-                        ],
-                      ),
                       const SizedBox(height: 24),
-        
-                      // Sign up link
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Don't have an account? ",
-                            style: TextStyle(color: Colors.grey[600]),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Get.toNamed(RouteClass.getHomeRoute());
-                            },
-                            child: Text(
-                              'Sign Up',
-                              style: TextStyle(
-                                color: Colors.blue[600],
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
                     ],
                   ),
                 ),
