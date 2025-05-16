@@ -1,23 +1,17 @@
-import 'package:demo/controllers/auth_controller.dart';
-import 'package:demo/services/stored_service.dart';
+import 'package:demo/controllers/notification_controller.dart';
+import 'package:demo/models/noification.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'dart:convert';
-import 'package:demo/models/noification.dart';
-import 'package:demo/controllers/notification_controller.dart';
-import 'package:demo/wigets/drawer.dart';
 
 class NotificationPage extends StatelessWidget {
-  final NotificationController notificationController =
-      Get.find<NotificationController>();
-  final StorageService storageService = Get.find<StorageService>();
+  final NotificationController notificationController = Get.find();
+
   NotificationPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: _buildAppBar(),
       body: _buildNotificationList(),
       floatingActionButton: _buildRefreshButton(),
@@ -26,7 +20,6 @@ class NotificationPage extends StatelessWidget {
 
   AppBar _buildAppBar() {
     return AppBar(
-      
       title: Obx(
         () => Text(
           'Notifications ${notificationController.unreadCount.value > 0 ? '(${notificationController.unreadCount.value})' : ''}',
@@ -36,14 +29,13 @@ class NotificationPage extends StatelessWidget {
       elevation: 0,
       actions: [
         Obx(
-          () =>
-              notificationController.unreadCount.value > 0
-                  ? IconButton(
-                    icon: _buildMarkAllAsReadIcon(),
-                    onPressed: notificationController.markAllAsRead,
-                    tooltip: 'Mark all as read',
-                  )
-                  : const SizedBox(),
+          () => notificationController.unreadCount.value > 0
+              ? IconButton(
+                  icon: _buildMarkAllAsReadIcon(),
+                  onPressed: notificationController.markAllAsRead,
+                  tooltip: 'Mark all as read',
+                )
+              : const SizedBox(),
         ),
       ],
     );
@@ -59,17 +51,18 @@ class NotificationPage extends StatelessWidget {
             padding: const EdgeInsets.all(2),
             decoration: BoxDecoration(
               color: Colors.red,
-              borderRadius: BorderRadius.circular(10),
-            ),
+              borderRadius: BorderRadius.circular(10)),
             constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-            child: Text(
-              notificationController.unreadCount.value.toString(),
-              style: const TextStyle(color: Colors.white, fontSize: 10),
-              textAlign: TextAlign.center,
+            child: Obx(
+              () => Text(
+                notificationController.unreadCount.value.toString(),
+                style: const TextStyle(color: Colors.white, fontSize: 10),
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
         ),
-      ],
+    ],
     );
   }
 
@@ -90,9 +83,8 @@ class NotificationPage extends StatelessWidget {
           itemCount: notificationController.notifications.length,
           separatorBuilder: (context, index) => const Divider(height: 1),
           itemBuilder: (context, index) {
-            final Notificatione notificatione =
-                notificationController.notifications[index];
-            return _buildNotificationItem(notificatione, context);
+            final notification = notificationController.notifications[index];
+            return _buildNotificationItem(notification);
           },
         );
       }),
@@ -122,49 +114,42 @@ class NotificationPage extends StatelessWidget {
     );
   }
 
-  Widget _buildNotificationItem(
-    Notificatione notificatione,
-    BuildContext context,
-  ) {
+  Widget _buildNotificationItem(Notificatione notification) {
     final dateFormat = DateFormat('MMM dd, yyyy - hh:mm a');
-    final createdAt =
-        notificatione.createdAt != null
-            ? DateTime.tryParse(notificatione.createdAt!)
-            : null;
+    final createdAt = notification.createdAt != null 
+        ? DateTime.tryParse(notification.createdAt!) 
+        : null;
 
     return Dismissible(
-     key: ValueKey(notificatione.id),
+      key: ValueKey(notification.id),
       direction: DismissDirection.endToStart,
       background: _buildDismissBackground(),
-      confirmDismiss: (direction) => _confirmDismiss(context),
-      onDismissed: (_) => _handleDismiss(notificatione, context),
+      onDismissed: (_) => _handleDismiss(notification),
       child: InkWell(
-        onTap: () => _handleNotificationTap(notificatione),
+        onTap: () => _handleNotificationTap(notification),
         child: Container(
-          color:
-              notificatione.isRead
-                  ? Colors.transparent
-                  : Colors.blue.shade50.withOpacity(0.5),
+          color: notification.isRead 
+              ? Colors.transparent 
+              : Colors.blue.shade50.withOpacity(0.5),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  _buildReadStatusIcon(notificatione),
+                  _buildReadStatusIcon(notification),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      notificatione.message ?? 'No message',
+                      notification.message ?? 'No message',
                       style: TextStyle(
-                        fontWeight:
-                            notificatione.isRead
-                                ? FontWeight.normal
-                                : FontWeight.bold,
+                        fontWeight: notification.isRead 
+                            ? FontWeight.normal 
+                            : FontWeight.bold,
                       ),
                     ),
                   ),
-                  if (!notificatione.isRead) _buildUnreadIndicator(),
+                  if (!notification.isRead) _buildUnreadIndicator(),
                 ],
               ),
               const SizedBox(height: 4),
@@ -185,50 +170,40 @@ class NotificationPage extends StatelessWidget {
     );
   }
 
-  Future<bool?> _confirmDismiss(BuildContext context) {
-    return showDialog<bool>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Delete Notification'),
-            content: const Text(
-              'Are you sure you want to delete this notification?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text(
-                  'Delete',
-                  style: TextStyle(color: Colors.red),
-                ),
-              ),
-            ],
-          ),
+  Future<void> _handleDismiss(Notificatione notification) async {
+    final confirmed = await Get.defaultDialog<bool>(
+      title: 'Delete Notification',
+      middleText: 'Are you sure you want to delete this notification?',
+      textConfirm: 'Delete',
+      textCancel: 'Cancel',
+      confirmTextColor: Colors.white,
+      buttonColor: Colors.red,
+      cancelTextColor: Colors.blue,
+      onConfirm: () => Get.back(result: true),
+      onCancel: () => Get.back(result: false),
     );
+
+    if (confirmed == true) {
+      await notificationController.deleteNotification(notification.id!);
+      Get.snackbar(
+        'Deleted',
+        'Notification has been deleted',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
-  void _handleDismiss(Notificatione notificatione, BuildContext context) {
-    // TODO: Implement delete functionality when API supports it
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Deleted ${notificatione.message}')));
-  }
-
-  void _handleNotificationTap(Notificatione notificatione) {
-    if (!notificatione.isRead) {
-      notificationController.markAsRead(notificatione.id!);
+  void _handleNotificationTap(Notificatione notification) {
+    if (!notification.isRead) {
+      notificationController.markAsRead(notification.id!);
     }
     // TODO: Add navigation to relevant screen based on notification type
   }
 
-  Widget _buildReadStatusIcon(Notificatione notificatione) {
+  Widget _buildReadStatusIcon(Notificatione notification) {
     return Icon(
-      notificatione.isRead ? Icons.check_circle : Icons.info,
-      color: notificatione.isRead ? Colors.green : Colors.orange,
+      notification.isRead ? Icons.check_circle : Icons.info,
+      color: notification.isRead ? Colors.green : Colors.orange,
       size: 20,
     );
   }

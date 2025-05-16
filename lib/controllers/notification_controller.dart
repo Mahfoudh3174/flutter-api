@@ -66,10 +66,11 @@ class NotificationController extends GetxController {
       }
 
       final response = await http.post(
-        Uri.parse('$_baseUrl/notifications/$notificationId'),
+        Uri.parse('$_baseUrl/notifications/$notificationId/mark-as-read'),
         headers: {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',
+          'Content-Type': 'application/json',
         },
       );
 
@@ -120,5 +121,32 @@ class NotificationController extends GetxController {
     }
   }
 
+Future <void> deleteNotification(String notificationId) async {
+  try {
+    final String? token =storage.getToken();
+
+    if (token == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final response = await http.delete(
+      Uri.parse('$_baseUrl/notifications/$notificationId'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      // Update the local notification state
+      notifications.removeWhere((n) => n.id == notificationId);
+      unreadCount.value = unreadCount.value - 1;
+    } else {
+      throw Exception('Failed to delete notification');
+    }
+  } catch (e) {
+    Get.snackbar('Error', e.toString());
+  }
+}
 
 }
