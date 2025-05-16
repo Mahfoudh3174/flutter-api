@@ -1,14 +1,16 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:demo/models/Client.dart';
 import 'package:demo/services/stored_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
-
+import 'package:demo/models/order.dart';
 import 'package:demo/routes/web.dart';
 
 class Clientscontroller extends GetxController {
   var clients = <Client>[].obs;
+  List orders = <Order>[].obs;
   RxBool isLoading = false.obs;
   final storage = Get.find<StorageService>();
   @override
@@ -166,4 +168,85 @@ class Clientscontroller extends GetxController {
       Get.snackbar('Exception', 'Something went wrong: $e');
     }
   }
+
+
+
+Future<void> getOrders({required String id}) async {
+  try {
+    final token = storage.getToken();
+    if (token == null) {
+      Get.snackbar('Error', 'Authentication token not found');
+      return;
+    }
+
+    final response = await http.get(
+      Uri.parse('http://192.168.100.13:8000/api/orders/0196c64b-67c1-7276-b659-009189b51880'),
+      headers: {
+        // 'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      print('Raw API Response: ${response.body}'); // Debug raw response
+
+      List<Order> fetchedOrders = [];
+
+      // Case 1: Response contains 'orders' key
+      if (responseData.containsKey('orders')) {
+        if (responseData['orders'] is List) {
+          fetchedOrders = (responseData['orders'] as List)
+              .map<Order>((orderJson) => Order.fromJson(orderJson))
+              .toList();
+        } 
+        // Handle case where 'orders' is a single order Map
+        else if (responseData['orders'] is Map) {
+          fetchedOrders = [Order.fromJson(responseData['orders'])];
+        }
+        else {
+          throw FormatException(
+            'Expected List or Map for orders, got ${responseData['orders'].runtimeType}'
+          );
+        }
+      }
+      // Case 2: Response is directly a List of orders
+      else if (responseData is List) {
+        fetchedOrders = (responseData as List)
+            .map<Order>((orderJson) => Order.fromJson(orderJson))
+            .toList();
+      }
+    
+      // Unexpected format
+      else {
+        throw FormatException(
+          'Unexpected response format: ${responseData.runtimeType}'
+        );
+      }
+
+      if (fetchedOrders.isNotEmpty) {
+        orders.assignAll(fetchedOrders);
+        print('Successfully loaded ${fetchedOrders.length} orders');
+      } else {
+        Get.snackbar('Info', 'No orders found');
+      }
+    } else {
+      throw HttpException(
+        'Failed to load orders', 
+        
+        
+      );
+    }
+  } on FormatException catch (e) {
+    print('Format Error: $e');
+    Get.snackbar('Data Error', 'Invalid data format: ${e.message}');
+  } on HttpException catch (e) {
+    print('HTTP Error: $e');
+    Get.snackbar('Network Error', 'Failed to load orders (Status ${e.message})');
+  } catch (e, stackTrace) {
+    print('Unexpected Error: $e\n$stackTrace');
+    Get.snackbar('Error', 'An unexpected error occurred');
+  }
+}
 }

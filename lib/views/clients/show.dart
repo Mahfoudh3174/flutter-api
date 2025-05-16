@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:demo/controllers/client_controller.dart';
 
 class ClientDetailsPage extends StatelessWidget {
+  final Clientscontroller controller = Get.find();
   // Sample static data - in a real app this would come from API/controller
   final Map client = {
     'name': 'John Doe',
@@ -75,6 +77,7 @@ class ClientDetailsPage extends StatelessWidget {
             ListView.separated(
               physics: NeverScrollableScrollPhysics(),
               shrinkWrap: true,
+              
               itemCount: client['orders'].length,
               separatorBuilder: (context, index) => SizedBox(height: 12),
               itemBuilder: (context, index) {
@@ -149,6 +152,14 @@ class ClientDetailsPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                ElevatedButton(
+                  onPressed: () {
+                    final orders=controller.orders;
+                    print(orders.first.reference);
+                    
+                  },
+                  child: Text('View Order'),
+                ),
                 Text(
                   'Total',
                   style: TextStyle(fontWeight: FontWeight.bold),

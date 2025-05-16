@@ -146,8 +146,9 @@ class HomePage extends StatelessWidget {
                     ),
                   ],
                 ),
-                onTap: () {
-                  // Empty function for viewing details
+                onTap: ()async {
+                  await clientController.getOrders(id: client.id);
+                  Get.toNamed(RouteClass.getShowClientRoute());
                 },
               ),
             );
