@@ -1,7 +1,7 @@
 // order_model.dart
 import 'product.dart';
 import 'package:get/get.dart';
-import 'pivot.dart';
+import 'client.dart';
 import 'dart:convert';
 
 class Order {
@@ -11,6 +11,7 @@ class Order {
   final double totalAmount;
   final dynamic payment; // Could be null or another model
   final List<Product> products;
+  final Client client;
   final int items;
   final String createdAt;
   final String updatedAt;
@@ -22,20 +23,20 @@ class Order {
     required this.totalAmount,
     this.payment,
     required this.products,
+    required this.client,
     required this.items,
     required this.createdAt,
     required this.updatedAt,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
-    
     return Order(
-      
       id: json['id'],
       reference: json['reference'],
       status: json['status'],
       totalAmount: (json['total_amount'] as num).toDouble(),
       payment: json['payment'],
+      client: Client.fromJson(json['client']),
       products:
           (json['products'] as List)
               .map((product) => Product.fromJson(product))

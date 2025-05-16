@@ -173,6 +173,7 @@ class Clientscontroller extends GetxController {
 
 Future<void> getOrders({required String id}) async {
   try {
+    orders.clear();
     final token = storage.getToken();
     if (token == null) {
       Get.snackbar('Error', 'Authentication token not found');
@@ -180,9 +181,9 @@ Future<void> getOrders({required String id}) async {
     }
 
     final response = await http.get(
-      Uri.parse('http://192.168.100.13:8000/api/orders/0196c64b-67c1-7276-b659-009189b51880'),
+      Uri.parse('http://192.168.100.13:8000/api/clients/orders/$id'),
       headers: {
-        // 'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer $token',
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },

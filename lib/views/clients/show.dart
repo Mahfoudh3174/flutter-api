@@ -1,3 +1,4 @@
+import 'package:demo/models/order.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:demo/controllers/client_controller.dart';
@@ -5,41 +6,14 @@ import 'package:demo/controllers/client_controller.dart';
 class ClientDetailsPage extends StatelessWidget {
   final Clientscontroller controller = Get.find();
   // Sample static data - in a real app this would come from API/controller
-  final Map client = {
-    'name': 'John Doe',
-    'phone': '+1 234 567 890',
-    'email': 'john.doe@example.com',
-    'address': '123 Main St, New York, USA',
-    'orders': [
-      {
-        'reference': 'ORD-2023-001',
-        'products': [
-          {'name': 'Product A', 'quantity': 2, 'price': 25.99},
-          {'name': 'Product B', 'quantity': 1, 'price': 15.50},
-        ],
-        'total': 67.48,
-        'status': 'Delivered',
-        'date': '2023-05-15',
-      },
-      {
-        'reference': 'ORD-2023-002',
-        'products': [
-          {'name': 'Product C', 'quantity': 3, 'price': 12.75},
-        ],
-        'total': 38.25,
-        'status': 'Processing',
-        'date': '2023-06-20',
-      },
-    ],
-  };
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Client Details'),
       ),
-      body: SingleChildScrollView(
+      body:controller.orders.isEmpty?Center(child: Text('No orders found'),): Obx (()=>SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,13 +26,13 @@ class ClientDetailsPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      client['name'],
+                      controller.orders.first.client.name,
                       
                     ),
                     SizedBox(height: 8),
-                    _buildInfoRow(Icons.phone, client['phone']),
-                    _buildInfoRow(Icons.email, client['email']),
-                    _buildInfoRow(Icons.location_on, client['address']),
+                    _buildInfoRow(Icons.phone, controller.orders.first.client.phone),
+                  
+                    
                   ],
                 ),
               ),
@@ -78,16 +52,16 @@ class ClientDetailsPage extends StatelessWidget {
               physics: NeverScrollableScrollPhysics(),
               shrinkWrap: true,
               
-              itemCount: client['orders'].length,
+              itemCount: controller.orders.length,
               separatorBuilder: (context, index) => SizedBox(height: 12),
               itemBuilder: (context, index) {
-                final order = client['orders'][index];
+                final order = controller.orders[index];
                 return _buildOrderCard(order, context);
               },
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 
@@ -104,7 +78,7 @@ class ClientDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildOrderCard(Map<String, dynamic> order, BuildContext context) {
+  Widget _buildOrderCard(Order order, BuildContext context) {
     return Card(
       child: Padding(
         padding: EdgeInsets.all(16),
@@ -115,33 +89,33 @@ class ClientDetailsPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Order #${order['reference']}',
+                  'Order #${order.reference}',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Chip(
                   label: Text(
-                    order['status'],
+                    order.status,
                     style: TextStyle(color: Colors.white),
                   ),
-                  backgroundColor: _getStatusColor(order['status']),
+                  backgroundColor: _getStatusColor(order.status),
                 ),
               ],
             ),
             SizedBox(height: 8),
             Text(
-              'Date: ${order['date']}',
+              'Date: ${order.createdAt}',
               style: TextStyle(color: Colors.grey),
             ),
             SizedBox(height: 12),
             
             // Products List
-            ...order['products'].map<Widget>((product) => Padding(
+            ...order.products.map<Widget>((product) => Padding(
               padding: EdgeInsets.symmetric(vertical: 4),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('${product['quantity']} x ${product['name']}'),
-                  Text('\$${product['price'].toStringAsFixed(2)}'),
+                  Text('${product.pivot.quantity} x ${product.name}'),
+                  Text('\$${product.price.toStringAsFixed(2)}'),
                 ],
               ),
             )).toList(),
@@ -165,7 +139,7 @@ class ClientDetailsPage extends StatelessWidget {
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  '\$${order['total'].toStringAsFixed(2)}',
+                  '\$${order.totalAmount.toStringAsFixed(2)}',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,

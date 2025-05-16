@@ -147,6 +147,7 @@ class HomePage extends StatelessWidget {
                   ],
                 ),
                 onTap: ()async {
+                  print(client.id);
                   await clientController.getOrders(id: client.id);
                   Get.toNamed(RouteClass.getShowClientRoute());
                 },
