@@ -169,85 +169,166 @@ class Clientscontroller extends GetxController {
     }
   }
 
+  Future<void> getOrders({required String id}) async {
+    try {
+      orders.clear();
+      final token = storage.getToken();
+      if (token == null) {
+        Get.snackbar('Error', 'Authentication token not found');
+        return;
+      }
 
+      final response = await http.get(
+        Uri.parse('http://192.168.100.13:8000/api/clients/orders/$id'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      );
 
-Future<void> getOrders({required String id}) async {
-  try {
-    orders.clear();
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        print('Raw API Response: ${response.body}'); // Debug raw response
+
+        List<Order> fetchedOrders = [];
+
+        // Case 1: Response contains 'orders' key
+        if (responseData.containsKey('orders')) {
+          if (responseData['orders'] is List) {
+            fetchedOrders =
+                (responseData['orders'] as List)
+                    .map<Order>((orderJson) => Order.fromJson(orderJson))
+                    .toList();
+          }
+          // Handle case where 'orders' is a single order Map
+          else if (responseData['orders'] is Map) {
+            fetchedOrders = [Order.fromJson(responseData['orders'])];
+          } else {
+            throw FormatException(
+              'Expected List or Map for orders, got ${responseData['orders'].runtimeType}',
+            );
+          }
+        }
+        // Case 2: Response is directly a List of orders
+        else if (responseData is List) {
+          fetchedOrders =
+              (responseData as List)
+                  .map<Order>((orderJson) => Order.fromJson(orderJson))
+                  .toList();
+        }
+        // Unexpected format
+        else {
+          throw FormatException(
+            'Unexpected response format: ${responseData.runtimeType}',
+          );
+        }
+
+        if (fetchedOrders.isNotEmpty) {
+          orders.assignAll(fetchedOrders);
+          print('Successfully loaded ${fetchedOrders.length} orders');
+        } else {
+          Get.snackbar('Info', 'No orders found');
+        }
+      } else {
+        throw HttpException('Failed to load orders');
+      }
+    } on FormatException catch (e) {
+      print('Format Error: $e');
+      Get.snackbar('Data Error', 'Invalid data format: ${e.message}');
+    } on HttpException catch (e) {
+      print('HTTP Error: $e');
+      Get.snackbar(
+        'Network Error',
+        'Failed to load orders (Status ${e.message})',
+      );
+    } catch (e, stackTrace) {
+      print('Unexpected Error: $e\n$stackTrace');
+      Get.snackbar('Error', 'An unexpected error occurred');
+    }
+  }
+
+  Future<void> markAsPaid({required String id}) async {
     final token = storage.getToken();
     if (token == null) {
       Get.snackbar('Error', 'Authentication token not found');
       return;
     }
 
-    final response = await http.get(
-      Uri.parse('http://192.168.100.13:8000/api/clients/orders/$id'),
+    final response = await http.put(
+      Uri.parse('http://192.168.100.13:8000/api/clients/orders/mark-paid/$id'),
       headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
     );
-
     if (response.statusCode == 200) {
-      final responseData = json.decode(response.body);
-      print('Raw API Response: ${response.body}'); // Debug raw response
+      Get.snackbar('Success', 'Order marked as paid');
+      final index = orders.indexWhere((order) => order.id == id);
 
-      List<Order> fetchedOrders = [];
+      if (index != -1) {
+        // Create a new Order object with updated status
+        final updatedOrder = orders[index].copyWith(status: 'paid');
 
-      // Case 1: Response contains 'orders' key
-      if (responseData.containsKey('orders')) {
-        if (responseData['orders'] is List) {
-          fetchedOrders = (responseData['orders'] as List)
-              .map<Order>((orderJson) => Order.fromJson(orderJson))
-              .toList();
-        } 
-        // Handle case where 'orders' is a single order Map
-        else if (responseData['orders'] is Map) {
-          fetchedOrders = [Order.fromJson(responseData['orders'])];
-        }
-        else {
-          throw FormatException(
-            'Expected List or Map for orders, got ${responseData['orders'].runtimeType}'
-          );
-        }
-      }
-      // Case 2: Response is directly a List of orders
-      else if (responseData is List) {
-        fetchedOrders = (responseData as List)
-            .map<Order>((orderJson) => Order.fromJson(orderJson))
-            .toList();
-      }
-    
-      // Unexpected format
-      else {
-        throw FormatException(
-          'Unexpected response format: ${responseData.runtimeType}'
-        );
-      }
-
-      if (fetchedOrders.isNotEmpty) {
-        orders.assignAll(fetchedOrders);
-        print('Successfully loaded ${fetchedOrders.length} orders');
-      } else {
-        Get.snackbar('Info', 'No orders found');
+        // Update the list immutably
+        orders[index] = updatedOrder;
       }
     } else {
-      throw HttpException(
-        'Failed to load orders', 
-        
-        
-      );
+      Get.snackbar('Error', 'Failed to mark order as paid');
     }
-  } on FormatException catch (e) {
-    print('Format Error: $e');
-    Get.snackbar('Data Error', 'Invalid data format: ${e.message}');
-  } on HttpException catch (e) {
-    print('HTTP Error: $e');
-    Get.snackbar('Network Error', 'Failed to load orders (Status ${e.message})');
-  } catch (e, stackTrace) {
-    print('Unexpected Error: $e\n$stackTrace');
-    Get.snackbar('Error', 'An unexpected error occurred');
+  }
+
+Future<void> exportPdf({required String id}) async {
+  try {
+    final token = storage.getToken();
+    if (token == null) {
+      Get.snackbar('Error', 'Authentication token not found');
+      return;
+    }
+
+    // Show loading indicator
+    
+
+    final response = await http.get(
+      Uri.parse('http://192.168.100.13:8000/api/clients/orders/export-pdf/$id'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/pdf',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    Get.back(); // Close loading dialog
+
+    if (response.statusCode == 200) {
+      // Get the PDF bytes
+      final bytes = response.bodyBytes;
+      
+      // Get external storage directory
+      final directory = await getExternalStorageDirectory();
+      final path = directory?.path;
+      
+      if (path == null) {
+        throw Exception('Could not access storage');
+      }
+
+      // Create file
+      final file = File('$path/invoice-$id.pdf');
+      
+      // Write PDF bytes to file
+      await file.writeAsBytes(bytes);
+      
+      // Open the file
+      await OpenFile.open(file.path);
+      
+      Get.snackbar('Success', 'PDF exported successfully');
+    } else {
+      throw Exception('Failed to download PDF: ${response.statusCode}');
+    }
+  } catch (e) {
+    Get.snackbar('Error', 'Failed to export PDF: ${e.toString()}');
   }
 }
+
 }

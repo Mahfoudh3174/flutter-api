@@ -99,6 +99,14 @@ class ClientDetailsPage extends StatelessWidget {
                   ),
                   backgroundColor: _getStatusColor(order.status),
                 ),
+                SizedBox(width: 8),
+          IconButton(
+            icon: Icon(Icons.picture_as_pdf_rounded, color: Colors.red),
+            onPressed: () async{
+              await controller.exportPdf(id: order.id);
+            },
+            tooltip: 'Export as PDF',
+          ),
               ],
             ),
             SizedBox(height: 8),
@@ -126,14 +134,15 @@ class ClientDetailsPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                order.status == 'paid' ? Icon(Icons.check_circle, color: Colors.green) : 
                 ElevatedButton(
-                  onPressed: () {
-                    final orders=controller.orders;
-                    print(orders.first.reference);
+                  onPressed: () async {
+                    await controller.markAsPaid(id: order.id);
                     
                   },
-                  child: Text('View Order'),
+                  child: Text('Mark as Paid'),
                 ),
+                
                 Text(
                   'Total',
                   style: TextStyle(fontWeight: FontWeight.bold),

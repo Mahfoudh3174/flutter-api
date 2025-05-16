@@ -60,4 +60,18 @@ class Order {
       'updated_at': updatedAt,
     };
   }
+  Order copyWith({String? id, String? reference, String? status, double? totalAmount, dynamic payment, List<Product>? products, Client? client, int? items, String? createdAt, String? updatedAt}) {
+    return Order(
+      id: id ?? this.id,
+      reference: reference ?? this.reference,
+      status: status ?? this.status,
+      totalAmount: totalAmount ?? this.totalAmount,
+      payment: payment ?? this.payment,
+      products: products ?? this.products,
+      client: client ?? this.client,
+      items: items ?? this.items,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 }
