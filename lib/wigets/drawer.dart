@@ -6,9 +6,9 @@ import 'package:get/get.dart';
 
 class MainDrawer extends StatelessWidget {
   final authController = Get.find<Authcontroller>();
-  final String userName;
+  final String? userName;
   
-  final String userEmail;
+  final String? userEmail;
   
 
    MainDrawer({
@@ -27,13 +27,13 @@ class MainDrawer extends StatelessWidget {
           // User Accounts Drawer Header
           UserAccountsDrawerHeader(
             accountName: Text(
-              userName,
+              userName ?? 'Unknown',
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            accountEmail: Text(userEmail),
+            accountEmail: Text(userEmail ?? 'Unknown'),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
               child: ClipOval(

@@ -139,13 +139,19 @@ class Clientscontroller extends GetxController {
     required String name,
     required String phone,
   }) async {
+
+
     try {
+      
+      
       final token = storage.getToken();
       if (token == null) {
         Get.snackbar('Error', 'Authentication token not found');
         return;
       }
+      print(name);
       final requestbody = jsonEncode({"id": id, "name": name, "number": phone});
+      print(requestbody);
 
       final response = await http.put(
         Uri.parse('http://192.168.100.13:8000/api/clients/$id'),
@@ -163,6 +169,11 @@ class Clientscontroller extends GetxController {
         fetchClients();
         Get.snackbar('Success', 'Client updated successfully');
         Get.toNamed('/');
+      }else{
+        final errorData = jsonDecode(response.body);
+        print(errorData);
+        Get.snackbar('Error', errorData['message'] ?? 'Update failed',
+            snackPosition: SnackPosition.BOTTOM);
       }
     } catch (e) {
       Get.snackbar('Exception', 'Something went wrong: $e');
@@ -280,7 +291,6 @@ class Clientscontroller extends GetxController {
   }
 
   Future<void> exportPdf({required String id}) async {
-    
     final token = storage.getToken();
     if (token == null) {
       Get.snackbar('Error', 'Authentication token not found');
@@ -300,7 +310,5 @@ class Clientscontroller extends GetxController {
     } else {
       Get.snackbar('Error', 'Failed to mark order as paid');
     }
-
   }
-
 }

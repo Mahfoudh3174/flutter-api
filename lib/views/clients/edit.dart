@@ -3,33 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:demo/wigets/special_button.dart';
 
-class EditClientPage extends StatefulWidget {
+class EditClientPage extends GetView<Clientscontroller> {
   final Map<String, dynamic> client;
-
-  const EditClientPage({Key? key, required this.client}) : super(key: key);
-
-  @override
-  State<EditClientPage> createState() => _EditClientPageState();
-}
-
-class _EditClientPageState extends State<EditClientPage> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
   late final TextEditingController _phoneController;
-  final Clientscontroller clientController = Get.find();
 
-  @override
-  void initState() {
-    super.initState();
-    _nameController = TextEditingController(text: widget.client['name']);
-    _phoneController = TextEditingController(text: widget.client['phone']);
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _phoneController.dispose();
-    super.dispose();
+  EditClientPage({Key? key, required this.client}) : super(key: key) {
+    _nameController = TextEditingController(text: client['name']);
+    _phoneController = TextEditingController(text: client['phone']);
   }
 
   @override
@@ -42,12 +24,12 @@ class _EditClientPageState extends State<EditClientPage> {
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
-          ),
+              ),
         ),
         centerTitle: true,
         backgroundColor: Theme.of(context).colorScheme.primary,
         elevation: 0,
-        iconTheme: IconThemeData(color: Colors.blue[800]),
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -91,6 +73,7 @@ class _EditClientPageState extends State<EditClientPage> {
                   child: Column(
                     children: [
                       TextFormField(
+                        
                         controller: _nameController,
                         decoration: InputDecoration(
                           labelText: 'Full Name',
@@ -159,8 +142,8 @@ class _EditClientPageState extends State<EditClientPage> {
                         text: 'Update Client',
                         onPress: () async {
                           if (_formKey.currentState!.validate()) {
-                            await clientController.updateClient(
-                              id: widget.client['id'],
+                            await controller.updateClient(
+                              id: client['id'],
                               name: _nameController.text,
                               phone: _phoneController.text,
                             );
@@ -180,4 +163,6 @@ class _EditClientPageState extends State<EditClientPage> {
       ),
     );
   }
+
+  
 }
