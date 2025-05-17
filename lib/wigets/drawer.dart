@@ -66,10 +66,10 @@ class MainDrawer extends StatelessWidget {
                   },
                 ),
                 ListTile(
-                  leading: const Icon(Icons.person),
-                  title: const Text('client details'),
+                  leading: const Icon(Icons.group),
+                  title: const Text('Employees'),
                   onTap: () {
-                    Get.toNamed(RouteClass.getShowClientRoute());
+                    Get.toNamed(RouteClass.getUsersRoute());
                     // Navigate to profile
                   },
                 ),

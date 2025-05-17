@@ -1,4 +1,4 @@
-
+import 'package:demo/services/user_binding.dart';
 import 'package:demo/services/client_binding.dart';
 import 'package:demo/services/auth_binding.dart';
 import 'package:demo/services/notification_binding.dart';
@@ -10,23 +10,28 @@ import 'package:demo/views/homepage.dart';
 import 'package:demo/views/notifications/index.dart';
 import 'package:get/get.dart';
 import 'package:demo/middleware/auth_middleware.dart';
-
+import 'package:demo/views/users/index.dart';
+import 'package:demo/controllers/client_controller.dart';
 class RouteClass{
-  static const String home = '/';
-  static const String login = '/login';
-  static const String clients = '/clients';
-  static const String createClient = '/create-client';
-  static const String notifications = '/notifications';
-  static const String editClient='/edit-client';
-  static const String showClient='/show-client';
 
-  static String getHomeRoute() => home;
-  static String getLoginRoute() => login; 
-  static String getClientsRoute() => clients;
-  static String getNotificationsRoute() => notifications;
-  static String getCreateClientRoute() => createClient;
-  static String getEditClientRoute() => editClient;
-  static String getShowClientRoute() => showClient;
+  static String home = "/";
+  static String login = "/login";
+  static String createClient = "/create-client";
+  static String notifications = "/notifications";
+  static String editClient = "/edit-client";
+  static String showClient = "/show-client";
+  static String users = "/users";
+
+
+
+  static String getHomeRoute() => "/";
+  static String getLoginRoute() => "/login"; 
+  static String getClientsRoute() => "/clients";
+  static String getNotificationsRoute() => "/notifications";
+  static String getCreateClientRoute() => "/create-client";
+  static String getEditClientRoute() => "/edit-client";
+  static String getShowClientRoute() => "/show-client";
+  static String getUsersRoute() => "/users";
 
   static List<GetPage> getPages() {
     return [
@@ -39,6 +44,8 @@ class RouteClass{
     return EditClientPage(client: client);
   },middlewares: [SanctumAuthMiddleware()] ),
       GetPage(name: showClient, page: ()=> ClientDetailsPage(),middlewares: [SanctumAuthMiddleware()] ),
+
+     GetPage(name: users, page: () => UserPage(),middlewares: [SanctumAuthMiddleware()],binding: UserBinding() ),
     ];
   }
 }
