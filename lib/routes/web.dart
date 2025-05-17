@@ -12,6 +12,7 @@ import 'package:get/get.dart';
 import 'package:demo/middleware/auth_middleware.dart';
 import 'package:demo/views/users/index.dart';
 import 'package:demo/controllers/client_controller.dart';
+import 'package:demo/views/users/create.dart';
 class RouteClass{
 
   static String home = "/";
@@ -21,17 +22,19 @@ class RouteClass{
   static String editClient = "/edit-client";
   static String showClient = "/show-client";
   static String users = "/users";
+  static String createUser = "/create-user";
 
 
 
-  static String getHomeRoute() => "/";
-  static String getLoginRoute() => "/login"; 
-  static String getClientsRoute() => "/clients";
-  static String getNotificationsRoute() => "/notifications";
-  static String getCreateClientRoute() => "/create-client";
-  static String getEditClientRoute() => "/edit-client";
-  static String getShowClientRoute() => "/show-client";
-  static String getUsersRoute() => "/users";
+  static String getHomeRoute() => home;
+  static String getLoginRoute() => login; 
+  static String getClientsRoute() => home;
+  static String getNotificationsRoute() => notifications;
+  static String getCreateClientRoute() => createClient;
+  static String getEditClientRoute() => editClient;
+  static String getShowClientRoute() => showClient;
+  static String getUsersRoute() => users;
+  static String getCreateUserRoute() => createUser;
 
   static List<GetPage> getPages() {
     return [
@@ -46,6 +49,7 @@ class RouteClass{
       GetPage(name: showClient, page: ()=> ClientDetailsPage(),middlewares: [SanctumAuthMiddleware()] ),
 
      GetPage(name: users, page: () => UserPage(),middlewares: [SanctumAuthMiddleware()],binding: UserBinding() ),
+     GetPage(name: createUser, page: () => CreateUser(),middlewares: [SanctumAuthMiddleware()],binding: UserBinding() ),
     ];
   }
 }

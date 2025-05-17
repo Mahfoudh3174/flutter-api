@@ -41,4 +41,41 @@ class UserController extends GetxController {
     }
     isLoading.value = false;
   }
+
+
+Future<void> deleteUser({required int id}) async {
+  final response = await http.delete(
+    Uri.parse('http://192.168.100.13:8000/api/users/$id'),
+    headers: {
+      'Authorization': 'Bearer ${storage.getToken()}',
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+  );
+  if (response.statusCode == 200) {
+    users.removeWhere((user) => user.id == id);
+    Get.snackbar('User Deleted', 'User with id $id deleted');
+  } else {
+    final data = json.decode(response.body);
+    print(data['message']);
+    Get.snackbar('Error', 'deletion faild ${response.statusCode} wher $id');
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

@@ -9,59 +9,61 @@ class ClientDetailsPage extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Client Details'),
-      ),
-      body:controller.orders.isEmpty?Center(child: Text('No orders found'),): Obx (()=>SingleChildScrollView(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Client Information Section
-            Card(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      controller.orders.first.client.name,
-                      
-                    ),
-                    SizedBox(height: 8),
-                    _buildInfoRow(Icons.phone, controller.orders.first.client.phone),
-                  
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Client Details'),
+        ),
+        body:controller.orders.isEmpty?Center(child: Text('No orders found'),): Obx (()=>SingleChildScrollView(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Client Information Section
+              Card(
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        controller.orders.first.client.name,
+                        
+                      ),
+                      SizedBox(height: 8),
+                      _buildInfoRow(Icons.phone, controller.orders.first.client.phone),
                     
-                  ],
+                      
+                    ],
+                  ),
                 ),
               ),
-            ),
-            
-            SizedBox(height: 24),
-            
-            // Orders Section Header
-            Text(
-              'Order History',
               
-            ),
-            SizedBox(height: 8),
-            
-            // Orders List
-            ListView.separated(
-              physics: NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
+              SizedBox(height: 24),
               
-              itemCount: controller.orders.length,
-              separatorBuilder: (context, index) => SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final order = controller.orders[index];
-                return _buildOrderCard(order, context);
-              },
-            ),
-          ],
-        ),
-      )),
+              // Orders Section Header
+              Text(
+                'Order History',
+                
+              ),
+              SizedBox(height: 8),
+              
+              // Orders List
+              ListView.separated(
+                physics: NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                
+                itemCount: controller.orders.length,
+                separatorBuilder: (context, index) => SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final order = controller.orders[index];
+                  return _buildOrderCard(order, context);
+                },
+              ),
+            ],
+          ),
+        )),
+      ),
     );
   }
 

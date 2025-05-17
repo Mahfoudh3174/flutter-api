@@ -11,10 +11,12 @@ class NotificationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _buildAppBar(),
-      body: _buildNotificationList(),
-      
+    return SafeArea(
+      child: Scaffold(
+        appBar: _buildAppBar(),
+        body: _buildNotificationList(),
+        
+      ),
     );
   }
 

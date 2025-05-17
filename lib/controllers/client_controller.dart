@@ -71,6 +71,7 @@ class Clientscontroller extends GetxController {
     required String phone,
   }) async {
     try {
+      isLoading.value = true;
       final token = storage.getToken();
 
       if (token == null) {
@@ -102,6 +103,8 @@ class Clientscontroller extends GetxController {
     } catch (e) {
       Get.snackbar('Exception', 'Something went wrong: $e');
     }
+
+    isLoading.value = false;
   }
 
   Future<Client?> getClientById(String id) async {

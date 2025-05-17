@@ -18,22 +18,24 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: MainDrawer(
-        userName: storage.getUser()!.name,
-        userEmail: storage.getUser()!.email,
-      ),
-      appBar: AppBar(
-        title: const Text("Client Management"),
-        backgroundColor: Colors.blue,
-        actions: [_buildNotificationIcon()],
-      ),
-    
-      body: SafeArea(child: _buildBody()),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed(RouteClass.getCreateClientRoute()),
-        tooltip: 'Add New Client',
-        child: const Icon(Icons.add),
+    return SafeArea(
+      child: Scaffold(
+        drawer: MainDrawer(
+          userName: storage.getUser()!.name,
+          userEmail: storage.getUser()!.email,
+        ),
+        appBar: AppBar(
+          title: const Text("Client Management"),
+          backgroundColor: Colors.blue,
+          actions: [_buildNotificationIcon()],
+        ),
+      
+        body: SafeArea(child: _buildBody()),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => Get.toNamed(RouteClass.getCreateClientRoute()),
+          tooltip: 'Add New Client',
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
