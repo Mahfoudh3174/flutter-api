@@ -14,7 +14,7 @@ class NotificationPage extends StatelessWidget {
     return Scaffold(
       appBar: _buildAppBar(),
       body: _buildNotificationList(),
-      floatingActionButton: _buildRefreshButton(),
+      
     );
   }
 
@@ -23,9 +23,13 @@ class NotificationPage extends StatelessWidget {
       title: Obx(
         () => Text(
           'Notifications ${notificationController.unreadCount.value > 0 ? '(${notificationController.unreadCount.value})' : ''}',
+        style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          )
         ),
       ),
-      backgroundColor: Colors.blue.shade800,
+      backgroundColor: Colors.blue,
       elevation: 0,
       actions: [
         Obx(
@@ -226,12 +230,5 @@ class NotificationPage extends StatelessWidget {
     );
   }
 
-  Widget _buildRefreshButton() {
-    return FloatingActionButton(
-      onPressed: notificationController.fetchNotifications,
-      mini: true,
-      child: const Icon(Icons.refresh),
-      tooltip: 'Refresh notifications',
-    );
-  }
+  
 }

@@ -25,7 +25,7 @@ class HomePage extends StatelessWidget {
       ),
       appBar: AppBar(
         title: const Text("Client Management"),
-        backgroundColor: Colors.blue.shade800,
+        backgroundColor: Colors.blue,
         actions: [_buildNotificationIcon()],
       ),
     
@@ -114,7 +114,7 @@ class HomePage extends StatelessWidget {
                 
                 leading: CircleAvatar(
                   
-                  backgroundColor: Colors.blue.shade100,
+                  backgroundColor: Theme.of(context).primaryColor,
                   child: Text(client.name[0].toUpperCase()),
                 ),
                 title: Text(

@@ -5,7 +5,7 @@ import 'package:demo/wigets/special_button.dart';
 import 'package:demo/routes/web.dart';
 
 class Login extends StatelessWidget {
-  final TextEditingController emailController = TextEditingController();
+  final TextEditingController loginController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final RxBool isPasswordHidden = true.obs;
@@ -36,23 +36,21 @@ class Login extends StatelessWidget {
                 const SizedBox(height: 40),
                 // Welcome text
                 Obx(() {
-  // Show loading indicator if authentication is in progress
-  if (authController.isLoading.value) {
-    return const Center(
-      child: CircularProgressIndicator(),
-    );
-  }
-  
-  // Show welcome message when not loading
-  return Text(
-    'Welcome Back',
-    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-      fontWeight: FontWeight.bold,
-      color: Colors.blue[800],
-    ),
-    textAlign: TextAlign.center,
-  );
-}),
+                  // Show loading indicator if authentication is in progress
+                  if (authController.isLoading.value) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  // Show welcome message when not loading
+                  return Text(
+                    'Welcome Back',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue[800],
+                    ),
+                    textAlign: TextAlign.center,
+                  );
+                }),
                 const SizedBox(height: 8),
                 Text(
                   'Sign in to continue',
@@ -68,13 +66,13 @@ class Login extends StatelessWidget {
                   child: Column(
                     children: [
                       TextFormField(
-                        controller: emailController,
+                        controller: loginController,
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
-                          labelText: 'Email',
+                          labelText: 'Email or Phone',
                           labelStyle: TextStyle(color: Colors.grey[600]),
                           prefixIcon: Icon(
-                            Icons.email,
+                            Icons.person,
                             color: Colors.grey[600],
                           ),
                           filled: true,
@@ -97,10 +95,13 @@ class Login extends StatelessWidget {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter your email';
+                            return 'Please enter your email or phone number';
                           }
                           if (!value.contains('@')) {
-                            return 'Please enter a valid email';
+                            if (RegExp(r'^[2-4][0-9]{7}$').hasMatch(value)) {
+                              return null;
+                            }
+                            return 'Please enter a valid email or phone number';
                           }
                           return null;
                         },
@@ -178,7 +179,7 @@ class Login extends StatelessWidget {
                         onPress: () async {
                           if (_formKey.currentState!.validate()) {
                             await authController.login(
-                              emailController.text,
+                              loginController.text,
                               passwordController.text,
                             );
                           }

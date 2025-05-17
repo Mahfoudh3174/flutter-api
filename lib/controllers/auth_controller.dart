@@ -20,7 +20,7 @@ class Authcontroller extends GetxController {
         'Content-Type': 'application/json; charset=UTF-8',
         'Accept': 'application/json',
       },
-      body: jsonEncode(<String, String>{'email': email, 'password': password}),
+      body: jsonEncode(<String, String>{'credential': email, 'password': password}),
     );
 
     if (response.statusCode == 200) {
@@ -40,14 +40,14 @@ class Authcontroller extends GetxController {
       Get.offAllNamed(RouteClass.getHomeRoute()); // Navigate to the home page
     } else {
       // If the server did not return a 200 OK response, throw an exception.
-      Get.snackbar('Login Failed', 'Invalid email or password');
+      Get.snackbar('Login Failed', 'Invalid credentials');
     }
     isLoading.value = false;
   }
 
   Future<void> logout() async {
     final token = storage.getToken();
-    print('$token is not exist oe what');
+    
     final response = await http.post(
       Uri.parse('http://192.168.100.13:8000/api/logout'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
