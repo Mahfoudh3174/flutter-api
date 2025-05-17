@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:demo/wigets/tost.dart';
 
+
 class UserController extends GetxController {
   final users = <User>[].obs;
   final isLoading = true.obs;
@@ -35,7 +36,7 @@ class UserController extends GetxController {
       },
     );
     if (response.statusCode == 200) {
-      showToast("message", "success");
+      
       final data = json.decode(response.body);
       List<dynamic> usersData = data['users'];
       
@@ -59,7 +60,7 @@ Future<void> deleteUser({required int id}) async {
   );
   if (response.statusCode == 200) {
     users.removeWhere((user) => user.id == id);
-    Get.snackbar('User Deleted', 'User with id $id deleted');
+    showToast("User deleted successfully","success");
   } else {
     final data = json.decode(response.body);
     print(data['message']);
@@ -101,6 +102,7 @@ Future<void> createEmployee({
 
     if (response.statusCode == 200) {
       Get.snackbar('Success', 'Employee created successfully');
+      await fetchUsers();
       Get.toNamed(RouteClass.getUsersRoute());
     } else if(response.statusCode==422) {
       final data = json.decode(response.body);

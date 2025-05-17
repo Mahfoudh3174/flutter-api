@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:demo/controllers/client_controller.dart';
 import 'package:demo/routes/web.dart';
+import 'package:demo/wigets/tost.dart';
 
 class Authcontroller extends GetxController {
   final RxBool isLoggedIn = false.obs;
@@ -46,7 +47,8 @@ class Authcontroller extends GetxController {
       // If the server did not return a 200 OK response, throw an exception.
       final errorData = jsonDecode(response.body);
       print('=================================${errorData['message']}');
-      Get.snackbar('Login Failed', 'Invalid credentials');
+      showToast("invalid email or password", "error");
+      
     }
     isLoading.value = false;
   }
@@ -67,7 +69,7 @@ class Authcontroller extends GetxController {
       print(response.statusCode);
 
       // If the server did not return a 200 OK response, throw an exception.
-      Get.snackbar('Logout Failed', 'Failed to logout');
+      showToast("faild to logout", "error");
     }
   }
 }

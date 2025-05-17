@@ -1,10 +1,10 @@
 import 'package:demo/models/noification.dart';
 import 'package:demo/services/stored_service.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:demo/wigets/tost.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:demo/routes/web.dart';
+
 
 class NotificationController extends GetxController {
   static const String _baseUrl = 'http://192.168.100.13:8000/api';
@@ -51,7 +51,7 @@ class NotificationController extends GetxController {
         throw Exception('Failed to load notifications: ${response.statusCode}');
       }
     } catch (e) {
-      Get.snackbar('Error', e.toString());
+      showToast("Something went wrong: $e", "error");
     } finally {
       isLoading.value = false;
     }
@@ -87,7 +87,7 @@ class NotificationController extends GetxController {
         throw Exception('Failed to mark notification as read');
       }
     } catch (e) {
-      Get.snackbar('Error', e.toString());
+      showToast("Something went wrong: $e", "error");
     }
 
     isLoading.value = false;
@@ -121,7 +121,7 @@ class NotificationController extends GetxController {
         throw Exception('Failed to mark all notifications as read');
       }
     } catch (e) {
-      Get.snackbar('Error', e.toString());
+      showToast("Something went wrong: $e", "error");
     }
 
     isLoading.value = false;
@@ -152,7 +152,7 @@ Future <void> deleteNotification(String notificationId) async {
       throw Exception('Failed to delete notification');
     }
   } catch (e) {
-    Get.snackbar('Error', e.toString());
+    showToast("Something went wrong: $e", "error");
   }
 
   isLoading.value = false;

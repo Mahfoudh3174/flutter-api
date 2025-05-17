@@ -6,7 +6,8 @@ import 'package:demo/services/stored_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:demo/models/order.dart';
-import 'package:demo/routes/web.dart';
+
+import 'package:demo/wigets/tost.dart';
 
 class Clientscontroller extends GetxController {
   var clients = <Client>[].obs;
@@ -40,10 +41,10 @@ class Clientscontroller extends GetxController {
         List<dynamic> data = json.decode(response.body);
         clients.value = data.map((client) => Client.fromJson(client)).toList();
       } else {
-        Get.snackbar('Error', 'faild to load data');
+        showToast("faild to load data ${response.statusCode}", "error");
       }
     } catch (e) {
-      Get.snackbar('Error', e.toString());
+      showToast("Something went wrong: $e", "error");
     } finally {
       isLoading.value = false;
     }
@@ -61,9 +62,9 @@ class Clientscontroller extends GetxController {
     );
     if (response.statusCode == 200) {
       clients.removeWhere((client) => client.id == id);
-      Get.snackbar('Client Deleted', 'Client with id $id deleted');
+      showToast("Client deleted successfully","success");
     } else {
-      Get.snackbar('Error', 'deletion faild');
+      showToast("deletion faild ${response.statusCode} ", "error");
     }
     isLoading.value = false;
   }
@@ -77,7 +78,7 @@ class Clientscontroller extends GetxController {
       final token = storage.getToken();
 
       if (token == null) {
-        Get.snackbar('Error', 'Authentication token not found');
+        showToast("Authentication token not found", "error");
         return;
       }
 
@@ -92,7 +93,7 @@ class Clientscontroller extends GetxController {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Get.snackbar('Client Created', 'Client with name $name created');
+        showToast("Client created successfully","success");
         final data = jsonDecode(response.body);
         final client = data['client'];
         // Navigate to the home page
@@ -100,10 +101,10 @@ class Clientscontroller extends GetxController {
         Get.toNamed('/');
       } else {
         final error = jsonDecode(response.body);
-        Get.snackbar('Error', error['message'] ?? 'Creation failed');
+        showToast("Failed to create client: ${error['error']}", "error");
       }
     } catch (e) {
-      Get.snackbar('Exception', 'Something went wrong: $e');
+      showToast("Something went wrong: $e", "error");
     }
 
     isLoading.value = false;
@@ -114,7 +115,7 @@ class Clientscontroller extends GetxController {
       isLoading.value = true;
       final token = storage.getToken();
       if (token == null) {
-        Get.snackbar('Error', 'Authentication token not found');
+        showToast("Authentication token not found", "error");
         return null;
       }
       final response = await http.get(
@@ -131,12 +132,12 @@ class Clientscontroller extends GetxController {
         final client = data['client'];
         return Client.fromJson(client);
       } else {
-        Get.snackbar('Error', 'Client not found');
+        showToast("Failed to get client: ${response.statusCode}", "error");
         return null;
       }
       
     } catch (e) {
-      Get.snackbar('Exception', 'Something went wrong: $e');
+      showToast("Something went wrong: $e", "error");
       return null;
     }
     
@@ -154,7 +155,7 @@ class Clientscontroller extends GetxController {
       isLoading.value = true;
       final token = storage.getToken();
       if (token == null) {
-        Get.snackbar('Error', 'Authentication token not found');
+        showToast("Authentication token not found", "error");
         return;
       }
       print(name);
@@ -171,20 +172,19 @@ class Clientscontroller extends GetxController {
         body: requestbody,
       );
       if (response.statusCode == 200) {
-        Get.snackbar('Client Updated', 'Client with id $id updated');
+        showToast("Client updated successfully","success");
         final data = jsonDecode(response.body);
         final client = data['client'];
         fetchClients();
-        Get.snackbar('Success', 'Client updated successfully');
+        
         Get.toNamed('/');
       }else{
         final errorData = jsonDecode(response.body);
         print(errorData);
-        Get.snackbar('Error', errorData['message'] ?? 'Update failed',
-            snackPosition: SnackPosition.BOTTOM);
+        showToast("Failed to update client: ${errorData['error']}", "error");
       }
     } catch (e) {
-      Get.snackbar('Exception', 'Something went wrong: $e');
+      showToast("Something went wrong: $e", "error");
     }
 
     isLoading.value = false;
@@ -196,7 +196,7 @@ class Clientscontroller extends GetxController {
       orders.clear();
       final token = storage.getToken();
       if (token == null) {
-        Get.snackbar('Error', 'Authentication token not found');
+        showToast("Authentication token not found", "error");
         return;
       }
 
@@ -257,16 +257,13 @@ class Clientscontroller extends GetxController {
       }
     } on FormatException catch (e) {
       print('Format Error: $e');
-      Get.snackbar('Data Error', 'Invalid data format: ${e.message}');
+      showToast(e.message, "error");
     } on HttpException catch (e) {
       print('HTTP Error: $e');
-      Get.snackbar(
-        'Network Error',
-        'Failed to load orders (Status ${e.message})',
-      );
+      showToast(e.message, "error");
     } catch (e, stackTrace) {
       print('Unexpected Error: $e\n$stackTrace');
-      Get.snackbar('Error', 'An unexpected error occurred');
+      showToast("Something went wrong: $e", "error");
     }
 
     isLoading.value = false;
@@ -276,7 +273,7 @@ class Clientscontroller extends GetxController {
     isLoading.value = true;
     final token = storage.getToken();
     if (token == null) {
-      Get.snackbar('Error', 'Authentication token not found');
+      showToast("Authentication token not found", "error");
       return;
     }
 
@@ -289,7 +286,7 @@ class Clientscontroller extends GetxController {
       },
     );
     if (response.statusCode == 200) {
-      Get.snackbar('Success', 'Order marked as paid');
+      showToast("Order marked as paid successfully","success");
       final index = orders.indexWhere((order) => order.id == id);
 
       if (index != -1) {
@@ -300,7 +297,7 @@ class Clientscontroller extends GetxController {
         orders[index] = updatedOrder;
       }
     } else {
-      Get.snackbar('Error', 'Failed to mark order as paid');
+      showToast("Failed to mark order as paid", "error");
     }
 
     isLoading.value = false;
@@ -310,7 +307,7 @@ class Clientscontroller extends GetxController {
     isLoading.value = true;
     final token = storage.getToken();
     if (token == null) {
-      Get.snackbar('Error', 'Authentication token not found');
+      showToast("Authentication token not found", "error");
       return;
     }
 
@@ -323,9 +320,9 @@ class Clientscontroller extends GetxController {
       },
     );
     if (response.statusCode == 200) {
-      Get.snackbar('Success', 'Order expoted succesfully');
+      showToast("PDF exported successfully","success");
     } else {
-      Get.snackbar('Error', 'Failed to mark order as paid');
+      showToast("Failed to export PDF", "error");
     }
 
     isLoading.value = false;
