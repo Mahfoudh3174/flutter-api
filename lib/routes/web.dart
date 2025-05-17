@@ -1,4 +1,5 @@
 import 'package:demo/services/user_binding.dart';
+import 'package:demo/services/role_binding.dart';
 import 'package:demo/services/client_binding.dart';
 import 'package:demo/services/auth_binding.dart';
 import 'package:demo/services/notification_binding.dart';
@@ -11,7 +12,7 @@ import 'package:demo/views/notifications/index.dart';
 import 'package:get/get.dart';
 import 'package:demo/middleware/auth_middleware.dart';
 import 'package:demo/views/users/index.dart';
-import 'package:demo/controllers/client_controller.dart';
+
 import 'package:demo/views/users/create.dart';
 class RouteClass{
 
@@ -49,7 +50,7 @@ class RouteClass{
       GetPage(name: showClient, page: ()=> ClientDetailsPage(),middlewares: [SanctumAuthMiddleware()] ),
 
      GetPage(name: users, page: () => UserPage(),middlewares: [SanctumAuthMiddleware()],binding: UserBinding() ),
-     GetPage(name: createUser, page: () => CreateUser(),middlewares: [SanctumAuthMiddleware()],binding: UserBinding() ),
+     GetPage(name: createUser, page: () => CreateUser(),middlewares: [SanctumAuthMiddleware()],bindings: [UserBinding(),RoleBinding()] ),
     ];
   }
 }

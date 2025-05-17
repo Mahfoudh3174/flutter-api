@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:demo/models/user.dart';
+import 'package:demo/routes/web.dart';
 import 'package:demo/services/stored_service.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:demo/wigets/tost.dart';
 
 class UserController extends GetxController {
   final users = <User>[].obs;
@@ -18,11 +20,12 @@ class UserController extends GetxController {
   }
 
   Future<void> fetchUsers() async {
+    isLoading.value = true;
     final token=storage.getToken();
     if(token==null){
       return;
     }
-    isLoading.value = true;
+    
     final response = await http.get(
       Uri.parse('http://192.168.100.13:8000/api/users'),
       headers: {
@@ -32,6 +35,7 @@ class UserController extends GetxController {
       },
     );
     if (response.statusCode == 200) {
+      showToast("message", "success");
       final data = json.decode(response.body);
       List<dynamic> usersData = data['users'];
       
@@ -44,6 +48,7 @@ class UserController extends GetxController {
 
 
 Future<void> deleteUser({required int id}) async {
+  isLoading.value = true;
   final response = await http.delete(
     Uri.parse('http://192.168.100.13:8000/api/users/$id'),
     headers: {
@@ -60,9 +65,58 @@ Future<void> deleteUser({required int id}) async {
     print(data['message']);
     Get.snackbar('Error', 'deletion faild ${response.statusCode} wher $id');
   }
+  isLoading.value = false;
 }
 
+Future<void> createEmployee({
+  required String name,
+  required String email,
+  required String phone,
+  required String password,
+  required String roleId,
+}) async {
+  try {
+    final token = storage.getToken();
+    if (token == null) {
+      Get.snackbar('Error', 'Authentication token not found');
+      return;
+    }
+    
+    final response = await http.post(
+      Uri.parse('http://192.168.100.13:8000/api/users'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'name': name,
+        'email': email,
+        'number': phone,
+        'password': password,
+        'role_id': roleId,
+      }),
+    );
+    
 
+    if (response.statusCode == 200) {
+      Get.snackbar('Success', 'Employee created successfully');
+      Get.toNamed(RouteClass.getUsersRoute());
+    } else if(response.statusCode==422) {
+      final data = json.decode(response.body);
+      final errors = data['errors'] as Map<String, dynamic>;
+      String errorMessage = '';
+      errors.forEach((key, value) {
+        errorMessage += '$key: $value\n';
+      });
+      Get.snackbar('Error', errorMessage);
+    } else {
+      Get.snackbar('Error', 'Failed to create employee ${response.statusCode}');
+    }
+  } catch (e) {
+    Get.snackbar('Error ', e.toString());
+  }
+}
 
 
 

@@ -50,6 +50,7 @@ class Clientscontroller extends GetxController {
   }
 
   Future<void> deleteClient({required String id}) async {
+    isLoading.value = true;
     final response = await http.delete(
       Uri.parse('http://192.168.100.13:8000/api/clients/$id'),
       headers: {
@@ -64,6 +65,7 @@ class Clientscontroller extends GetxController {
     } else {
       Get.snackbar('Error', 'deletion faild');
     }
+    isLoading.value = false;
   }
 
   Future<void> createClient({
@@ -109,6 +111,7 @@ class Clientscontroller extends GetxController {
 
   Future<Client?> getClientById(String id) async {
     try {
+      isLoading.value = true;
       final token = storage.getToken();
       if (token == null) {
         Get.snackbar('Error', 'Authentication token not found');
@@ -122,7 +125,7 @@ class Clientscontroller extends GetxController {
           'Content-Type': 'application/json',
         },
       );
-
+       isLoading.value = false;
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final client = data['client'];
@@ -131,10 +134,12 @@ class Clientscontroller extends GetxController {
         Get.snackbar('Error', 'Client not found');
         return null;
       }
+      
     } catch (e) {
       Get.snackbar('Exception', 'Something went wrong: $e');
       return null;
     }
+    
   }
 
   Future updateClient({
@@ -146,7 +151,7 @@ class Clientscontroller extends GetxController {
 
     try {
       
-      
+      isLoading.value = true;
       final token = storage.getToken();
       if (token == null) {
         Get.snackbar('Error', 'Authentication token not found');
@@ -181,10 +186,13 @@ class Clientscontroller extends GetxController {
     } catch (e) {
       Get.snackbar('Exception', 'Something went wrong: $e');
     }
+
+    isLoading.value = false;
   }
 
   Future<void> getOrders({required String id}) async {
     try {
+      isLoading.value = true;
       orders.clear();
       final token = storage.getToken();
       if (token == null) {
@@ -260,9 +268,12 @@ class Clientscontroller extends GetxController {
       print('Unexpected Error: $e\n$stackTrace');
       Get.snackbar('Error', 'An unexpected error occurred');
     }
+
+    isLoading.value = false;
   }
 
   Future<void> markAsPaid({required String id}) async {
+    isLoading.value = true;
     final token = storage.getToken();
     if (token == null) {
       Get.snackbar('Error', 'Authentication token not found');
@@ -291,9 +302,12 @@ class Clientscontroller extends GetxController {
     } else {
       Get.snackbar('Error', 'Failed to mark order as paid');
     }
+
+    isLoading.value = false;
   }
 
   Future<void> exportPdf({required String id}) async {
+    isLoading.value = true;
     final token = storage.getToken();
     if (token == null) {
       Get.snackbar('Error', 'Authentication token not found');
@@ -313,5 +327,7 @@ class Clientscontroller extends GetxController {
     } else {
       Get.snackbar('Error', 'Failed to mark order as paid');
     }
+
+    isLoading.value = false;
   }
 }

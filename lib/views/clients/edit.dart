@@ -32,7 +32,7 @@ class EditClientPage extends GetView<Clientscontroller> {
           elevation: 0,
           iconTheme: IconThemeData(color: Colors.white),
         ),
-        body: SafeArea(
+        body:Obx(() => controller.isLoading.value ? const Center(child: CircularProgressIndicator()): SafeArea(
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -161,7 +161,7 @@ class EditClientPage extends GetView<Clientscontroller> {
               ),
             ),
           ),
-        ),
+        )),
       ),
     );
   }

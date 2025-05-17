@@ -59,6 +59,7 @@ class NotificationController extends GetxController {
 
   Future<void> markAsRead(String notificationId) async {
     try {
+      isLoading.value = true;
       final String? token =storage.getToken();
 
       if (token == null) {
@@ -88,10 +89,13 @@ class NotificationController extends GetxController {
     } catch (e) {
       Get.snackbar('Error', e.toString());
     }
+
+    isLoading.value = false;
   }
 
   Future<void> markAllAsRead() async {
     try {
+      isLoading.value = true;
       final String? token =storage.getToken();
 
       if (token == null) {
@@ -119,10 +123,13 @@ class NotificationController extends GetxController {
     } catch (e) {
       Get.snackbar('Error', e.toString());
     }
+
+    isLoading.value = false;
   }
 
 Future <void> deleteNotification(String notificationId) async {
   try {
+    isLoading.value = true;
     final String? token =storage.getToken();
 
     if (token == null) {
@@ -147,6 +154,8 @@ Future <void> deleteNotification(String notificationId) async {
   } catch (e) {
     Get.snackbar('Error', e.toString());
   }
+
+  isLoading.value = false;
 }
 
 }
