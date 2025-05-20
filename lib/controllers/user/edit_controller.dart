@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:demo/routes/web.dart';
 import 'package:demo/controllers/user_controller.dart';
 import 'package:demo/models/role.dart';
 import 'package:demo/models/user.dart';
@@ -62,7 +62,8 @@ class EditUserController extends GetxController {
     isLoading.value = false;
     print("==statusCode==${response.statusCode}");
     if (response.statusCode == 200) {
-      Get.back();
+      UsefulFunctions.showToast("User updated successfully", "success");
+      Get.toNamed(RouteClass.getUsersRoute());
       userController.fetchUsers();
     } else {
       UsefulFunctions.handleValidationErrors(response);
