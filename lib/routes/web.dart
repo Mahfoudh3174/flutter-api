@@ -1,4 +1,5 @@
-import 'package:demo/models/user.dart';
+import 'package:demo/views/dashboard.dart';
+import 'package:demo/services/dashboard_binding.dart';
 import 'package:demo/services/user_binding.dart';
 import 'package:demo/services/role_binding.dart';
 import 'package:demo/services/client_binding.dart';
@@ -26,7 +27,7 @@ class RouteClass{
   static String users = "/users";
   static String createUser = "/create-user";
   static String editUser = "/edit-user";
-
+  static String dashBoard = "/dashboard";
 
 
   static String getHomeRoute() => home;
@@ -39,9 +40,11 @@ class RouteClass{
   static String getUsersRoute() => users;
   static String getCreateUserRoute() => createUser;
   static String getEditUserRoute() => editUser;
+  static String getDashBoardRoute() => dashBoard;
 
   static List<GetPage> getPages() {
     return [
+      GetPage(name: dashBoard, page: () => DashboardScreen(),middlewares: [SanctumAuthMiddleware()],binding: DashboardBinding()),
       GetPage(name: home, page: () => HomePage(),middlewares: [SanctumAuthMiddleware()],bindings:[AuthBinding(),ClientBinding(),NotificationBinding()] ),
       GetPage(name: login, page: () => Login(),middlewares: [SanctumAuthMiddleware()],bindings:[AuthBinding()] ),
       GetPage(name: createClient, page: () => CreateClient(),middlewares: [SanctumAuthMiddleware()]),

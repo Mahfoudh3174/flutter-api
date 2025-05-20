@@ -36,7 +36,7 @@ class Clientscontroller extends GetxController {
           'Accept': 'application/json',
         },
       );
-
+      print("====response====${response.statusCode}");
       if (response.statusCode == 200) {
         List<dynamic> data = json.decode(response.body);
         clients.value = data.map((client) => Client.fromJson(client)).toList();

@@ -3,9 +3,11 @@ import 'package:demo/routes/web.dart';
 import 'package:demo/services/stored_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import 'package:demo/controllers/dasboard/dashboard_controller.dart';
+import 'package:demo/controllers/auth_controller.dart';
 class MainDrawer extends StatelessWidget {
-  final authController = Get.find<Authcontroller>();
+  final authController = Get.put(Authcontroller());
+  final dashboardController = Get.put(DashboardController());
   final String? userName;
   
   final String? userEmail;
@@ -61,7 +63,8 @@ class MainDrawer extends StatelessWidget {
                   leading: const Icon(Icons.home),
                   title: const Text('Home'),
                   onTap: () {
-                    Get.offAllNamed(RouteClass.getHomeRoute());
+                    // dashboardController.fetchDashboard();
+                    Get.offAllNamed(RouteClass.getDashBoardRoute());
                     // Navigate to home
                   },
                 ),
