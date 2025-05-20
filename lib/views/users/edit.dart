@@ -1,20 +1,19 @@
-import 'package:demo/controllers/client_controller.dart';
 import 'package:demo/controllers/role_controller.dart';
+import 'package:demo/controllers/user_controller.dart';
+import 'package:demo/controllers/user/edit_controller.dart';
+import 'package:demo/wigets/form_field.dart';
+import 'package:demo/wigets/special_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:demo/wigets/special_button.dart';
-import 'package:demo/wigets/form_field.dart';
-import 'package:demo/controllers/user_controller.dart';
-class CreateUser extends StatelessWidget {
-  CreateUser({super.key});
+
+class EditUser extends StatelessWidget {
   
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final UserController userController = Get.find();
+
+  EditUser({super.key});
+
+  EditUserController   controller = Get.put(EditUserController());
+  UserController roleController = Get.put(UserController());
+
   
 
   @override
@@ -23,7 +22,7 @@ class CreateUser extends StatelessWidget {
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: const Text(
-          'Create Employee',
+          'Edit Employee',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -54,7 +53,7 @@ class CreateUser extends StatelessWidget {
                 const SizedBox(height: 24),
                 // Title
                 Text(
-                  'Add New Employee',
+                  'Edit Employee',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Colors.blue[800],
@@ -63,7 +62,7 @@ class CreateUser extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Fill in the employee details',
+                  'Update the employee details',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.grey[600],
                   ),
@@ -72,11 +71,11 @@ class CreateUser extends StatelessWidget {
                 const SizedBox(height: 40),
                 // Form
                 Form(
-                  key: _formKey,
+                  key: controller.formKey,
                   child: Column(
                     children: [
                       CustomFormField(
-                        controller: nameController,
+                        controller: controller.nameController,
                         icon: Icons.person,
                         keyboardType: TextInputType.name,
                         label: "Full name", 
@@ -90,7 +89,7 @@ class CreateUser extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
                       CustomFormField(
-                        controller: emailController, 
+                        controller: controller.emailController, 
                         keyboardType: TextInputType.emailAddress, 
                         label: "Email", 
                         icon: Icons.email, 
@@ -106,44 +105,9 @@ class CreateUser extends StatelessWidget {
                         child: Text("Email"),
                       ),
                       const SizedBox(height: 20),
+                      
                       CustomFormField(
-                        controller: passwordController,
-                        keyboardType: TextInputType.visiblePassword,
-                        label: "Password",
-                        icon: Icons.lock,
-                        obscureText: true,
-                        validator: (value){
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your password';
-                          }
-                          if (value.length < 6) {
-                            return 'Password must be at least 6 characters';
-                          }
-                          return null;
-                        },
-                        child: Text("Password"),
-                      ),
-                      const SizedBox(height: 20),
-                      CustomFormField(
-                        controller: confirmPasswordController,
-                        keyboardType: TextInputType.visiblePassword,
-                        label: "Confirm Password",
-                        icon: Icons.lock,
-                        obscureText: true,
-                        validator: (value){
-                          if (value == null || value.isEmpty) {
-                            return 'Please confirm your password';
-                          }
-                          if (value != passwordController.text) {
-                            return 'Passwords do not match';
-                          }
-                          return null;
-                        },
-                        child: Text("Confirm Password"),
-                      ),
-                      const SizedBox(height: 20),
-                      CustomFormField(
-                        controller: phoneController,
+                        controller: controller.phoneController,
                         keyboardType: TextInputType.phone,
                         label: "Phone",
                         icon: Icons.phone,
@@ -160,7 +124,7 @@ class CreateUser extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
                       Obx(() {
-                        if (userController.isLoading.value) {
+                        if (roleController.isLoading.value) {
                           return const Center(child: CircularProgressIndicator());
                         }
                         
@@ -172,12 +136,12 @@ class CreateUser extends StatelessWidget {
                           ),
                           child: DropdownButtonHideUnderline(
                             child: DropdownButtonFormField<String>(
-                              value: userController.selectedRoleId.value.isEmpty 
+                              value: controller.selectedRoleId.value.isEmpty 
                                   ? null 
-                                  : userController.selectedRoleId.value,
+                                  : controller.selectedRoleId.value,
                               isExpanded: true,
                               hint: const Text('Select Role'),
-                              items: userController.roles.map((role) {
+                              items: roleController.roles.map((role) {
                                 return DropdownMenuItem<String>(
                                   value: role!.id.toString(),
                                   child: Text(role.name!),
@@ -186,7 +150,7 @@ class CreateUser extends StatelessWidget {
                               validator: (value) => value == null ? 'Please select a role' : null,
                               onChanged: (String? value) {
                                 if (value != null) {
-                                  userController.selectedRoleId.value = value;
+                                  controller.selectedRoleId.value = value;
                                 }
                               },
                             ),
@@ -195,23 +159,12 @@ class CreateUser extends StatelessWidget {
                       }),
                       const SizedBox(height: 40),
                       SpecialButton(
-                        text: 'Create Employee',
+                        text: 'Confirm',
                         onPress: ()async {
-                          if (_formKey.currentState!.validate()) {
-                            if (userController.selectedRoleId.value.isEmpty) {
-                              Get.snackbar('Error', 'Please select a role');
-                              return;
-                            }
-                            
-                            // Create employee with all fields
-                            await userController.createEmployee(
-                              name: nameController.text,
-                              email: emailController.text,
-                              phone: phoneController.text,
-                              password: passwordController.text,
-                              roleId: userController.selectedRoleId.value,
-                            );
-                            
+                          print("=================userControllerRoles==${roleController.roles}");
+                          if (controller.formKey.currentState!.validate()) {
+                            print("=================userControllerRoles==${controller.formKey.currentState!.validate()}");
+                          await  controller.updateUser(id: controller.user!.id!);
                           }
                         },
                         color: Colors.blue,
@@ -227,4 +180,5 @@ class CreateUser extends StatelessWidget {
       ),
     );
   }
+
 }

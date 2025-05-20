@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:demo/models/user.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 import 'package:demo/controllers/client_controller.dart';
 import 'package:demo/routes/web.dart';
 import 'package:demo/wigets/tost.dart';
@@ -30,15 +30,14 @@ class Authcontroller extends GetxController {
     if (response.statusCode == 200) {
       // If the server returns an OK response, parse the JSON.
       var data = jsonDecode(response.body);
-      
+      print("===============user=====${data['user']}");
+
       User user = User.fromJson(data['user']);
       String token = data['token'];
-      
 
       await storage.saveToken(token);
 
       await storage.saveUser(user);
-      
 
       final clientController = Get.put(Clientscontroller());
       await clientController.fetchClients();
@@ -48,7 +47,6 @@ class Authcontroller extends GetxController {
       final errorData = jsonDecode(response.body);
       print('=================================${errorData['message']}');
       showToast("invalid email or password", "error");
-      
     }
     isLoading.value = false;
   }

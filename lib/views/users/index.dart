@@ -1,4 +1,5 @@
 import 'package:demo/controllers/user_controller.dart';
+import 'package:demo/models/user.dart';
 import 'package:demo/routes/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -67,7 +68,7 @@ class UserPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  user.role?.name.toUpperCase() ?? 'NO ROLE',
+                  user.role?.name!.toUpperCase() ?? 'NO ROLE',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 12,
@@ -110,7 +111,9 @@ class UserPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
-                onPressed: () {},
+                onPressed: ()  {
+                  controller.goToEdit(user);
+                },
                 child: const Text('EDIT'),
               ),
               const SizedBox(width: 8),
@@ -123,7 +126,7 @@ class UserPage extends StatelessWidget {
                     confirm: TextButton(
                       onPressed: () async {
                         Get.back();
-                        await controller.deleteUser(id: user.id!);
+                        await controller.deleteUser(user.id!);
                       },
                       child: const Text('DELETE', style: TextStyle(color: Colors.red)),
                     ),

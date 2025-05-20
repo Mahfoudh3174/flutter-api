@@ -19,7 +19,7 @@ class RoleController extends GetxController {
 
   Future<void> fetchRoles() async {
     try {
-      isLoading.value = true;
+      
       final token = storage.getToken();
       if (token == null) {
         Get.snackbar('Error', 'Authentication token not found');
@@ -35,9 +35,9 @@ class RoleController extends GetxController {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final rolesData = data['roles'];
+        final List rolesData = data['roles'];
         print("=============================$rolesData");
-        roles.assignAll(rolesData.map((role) => Role.fromJson(role)));
+        roles.assignAll(rolesData);
         
       } else {
         Get.snackbar('Error', 'faild to load data');
@@ -45,7 +45,7 @@ class RoleController extends GetxController {
     } catch (e) {
       Get.snackbar('Error', e.toString());
     } finally {
-      isLoading.value = false;
+      
     }
   }
 }

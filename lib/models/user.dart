@@ -3,7 +3,7 @@ import 'role.dart';
 class User {
   final String? email;
   final Role? role; // Make nullable if role might be null
-  final int? id;
+  final String? id;
   final String? phone;
   final String? name;
 
