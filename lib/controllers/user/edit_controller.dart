@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:demo/routes/web.dart';
 import 'package:demo/controllers/user_controller.dart';
-import 'package:demo/models/role.dart';
+
 import 'package:demo/models/user.dart';
 import 'package:demo/services/stored_service.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +12,6 @@ class EditUserController extends GetxController {
   final StorageService storage = Get.find();
   final UserController userController = Get.find();
 
-  final RxList<Role?> roles = <Role?>[].obs;
   final RxBool isLoading = false.obs;
   final RxString selectedRoleId = ''.obs;
   User? user;

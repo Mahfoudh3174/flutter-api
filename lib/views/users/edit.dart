@@ -11,8 +11,8 @@ class EditUser extends StatelessWidget {
 
   EditUser({super.key});
 
-  EditUserController   controller = Get.put(EditUserController());
-  UserController roleController = Get.put(UserController());
+final  EditUserController   controller = Get.put(EditUserController());
+final  UserController roleController = Get.put(UserController());
 
   
 
