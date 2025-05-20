@@ -100,6 +100,13 @@ class DashboardScreen extends StatelessWidget {
                 _DashboardCard(
                   title: "Financial Summary",
                   children: [
+                                        _StatItem(
+                      icon: Icons.money_rounded,
+                      color: Colors.red,
+                      label: "Today's Revenue",
+                      value: "${controller.dashboard.value!.todayRevenue?.toStringAsFixed(2) ?? '0.00'} MRU",
+                      isCurrency: true,
+                    ),
                     _StatItem(
                       icon: Icons.attach_money_rounded,
                       color: Colors.teal,
