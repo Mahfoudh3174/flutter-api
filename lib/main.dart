@@ -1,10 +1,9 @@
-import 'package:demo/controllers/auth_controller.dart';
-import 'package:demo/controllers/client_controller.dart';
+
 import 'package:flutter/material.dart';
 import 'package:demo/routes/web.dart';
 import 'package:get/get.dart';
 import 'package:demo/services/stored_service.dart';
-import 'package:demo/controllers/dasboard/dashboard_controller.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

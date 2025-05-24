@@ -3,11 +3,11 @@ import 'package:demo/routes/web.dart';
 import 'package:demo/services/stored_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:demo/controllers/dasboard/dashboard_controller.dart';
+
 import 'package:demo/controllers/auth_controller.dart';
 class MainDrawer extends StatelessWidget {
   final authController = Get.put(Authcontroller());
-  final dashboardController = Get.put(DashboardController());
+
   final String? userName;
   
   final String? userEmail;
@@ -63,17 +63,14 @@ class MainDrawer extends StatelessWidget {
                   leading: const Icon(Icons.home),
                   title: const Text('Home'),
                   onTap: () {
-                    // dashboardController.fetchDashboard();
-                    Get.offAllNamed(RouteClass.getDashBoardRoute());
-                    // Navigate to home
+                    
                   },
                 ),
                 ListTile(
                   leading: const Icon(Icons.group),
                   title: const Text('Employees'),
                   onTap: () {
-                    Get.toNamed(RouteClass.getUsersRoute());
-                    // Navigate to profile
+                    
                   },
                 ),
                 ListTile(

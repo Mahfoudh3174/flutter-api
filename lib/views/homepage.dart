@@ -1,180 +1,91 @@
+import 'package:demo/controllers/pharmacy/pharmacy_controller.dart';
+import 'package:demo/models/pharmacy.dart';
 import 'package:demo/services/stored_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:demo/controllers/auth_controller.dart';
-import 'package:demo/controllers/client_controller.dart';
-import 'package:demo/controllers/notification_controller.dart';
+
 import 'package:demo/wigets/drawer.dart';
 import 'package:demo/routes/web.dart';
 
-class HomePage extends StatelessWidget {
-  final Clientscontroller clientController = Get.find();
-
-  final NotificationController notificationController = Get.put(
-    NotificationController(),
-  );
+class HomePage extends GetView<PharmacyController> {
   final storage = Get.find<StorageService>();
+
   HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        drawer: MainDrawer(
-          userName: storage.getUser()!.name,
-          userEmail: storage.getUser()!.email,
-        ),
         appBar: AppBar(
-          title: const Text("Client Management"),
-          backgroundColor: Colors.blue,
-          actions: [_buildNotificationIcon()],
+          title: const Text("Pharmacy List"),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () {
+                Get.find<Authcontroller>().logout();
+                storage.clearToken();
+                storage.clearUser();
+                Get.offAllNamed(RouteClass.getLoginRoute());
+              },
+            ),
+          ],
         ),
-      
-        body: SafeArea(child: _buildBody()),
+        drawer: MainDrawer(
+          userEmail: storage.getUser()?.email,
+          userName: storage.getUser()?.name,
+        ),
+        body: Obx(
+          () =>controller.isLoading.value ? const Center(child: CircularProgressIndicator()): RefreshIndicator(
+            onRefresh: controller.fetchPharmacies,
+            color: Colors.blue,
+            child: ListView.builder(
+              itemCount: controller.pharmacies.length,
+              itemBuilder: (context, index) {
+                final pharmacy = controller.pharmacies[index];
+                return PharmacyCard(pharmacy: pharmacy);
+              },
+            ),
+          ),
+        ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () => Get.toNamed(RouteClass.getCreateClientRoute()),
-          tooltip: 'Add New Client',
+          onPressed: () {
+            // Navigate to add pharmacy screen
+            // Get.toNamed(RouteClass.getAddPharmacyRoute());
+          },
           child: const Icon(Icons.add),
         ),
       ),
     );
   }
+}
 
-  Widget _buildNotificationIcon() {
-    return Obx(() {
-      final count = notificationController.unreadCount.value;
-      return IconButton(
-        icon: Stack(
-          children: [
-            const Icon(Icons.notifications),
-            if (count > 0)
-              Positioned(
-                right: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 16,
-                    minHeight: 16,
-                  ),
-                  child: Text(
-                    count.toString(),
-                    style: const TextStyle(color: Colors.white, fontSize: 10),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-          ],
-        ),
-        onPressed: () => Get.toNamed(RouteClass.getNotificationsRoute()),
-        tooltip: 'Notifications',
-      );
-    });
-  }
+class PharmacyCard extends StatelessWidget {
+  final Pharmacy pharmacy;
 
+  const PharmacyCard({super.key, required this.pharmacy});
 
-  Widget _buildBody() {
-    return RefreshIndicator(
-      onRefresh: clientController.fetchClients,
-      child: Obx(() {
-        if (clientController.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (clientController.clients.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.people_outline, size: 60, color: Colors.grey),
-                const SizedBox(height: 16),
-                Text(
-                  'No Clients Found',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Add your first client using the + button',
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return ListView.builder(
-          itemCount: clientController.clients.length,
-          itemBuilder: (context, index) {
-            final client = clientController.clients[index];
-            return Card(
-              
-              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: ListTile(
-                
-                leading: CircleAvatar(
-                  
-                  backgroundColor: Theme.of(context).primaryColor,
-                  child: Text(client.name[0].toUpperCase()),
-                ),
-                title: Text(
-                  client.name,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text(client.phone),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.blue),
-                      onPressed: () {
-                       Map<String, dynamic> singleclient = {
-                          'id': client.id,
-                          'name': client.name,
-                          'phone': client.phone,
-                        };
-                        Get.toNamed(
-                          RouteClass.getEditClientRoute(),
-                          arguments: singleclient,
-                        );
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed:
-                          () => _showDeleteDialog(client.id, client.name),
-                    ),
-                  ],
-                ),
-                onTap: ()async {
-                  print(client.id);
-                  await clientController.getOrders(id: client.id);
-                  Get.toNamed(RouteClass.getShowClientRoute());
-                },
-              ),
-            );
-          },
-        );
-      }),
-    );
-  }
-
-  void _showDeleteDialog(String clientId, String clientName) {
-    Get.defaultDialog(
-      title: 'Delete Client',
-      content: Text('Are you sure you want to delete $clientName?'),
-      confirm: TextButton(
-        onPressed: () async {
-          Get.back();
-          await clientController.deleteClient(id: clientId);
-        },
-        child: const Text('DELETE', style: TextStyle(color: Colors.red)),
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        side: const BorderSide(color: Colors.grey, width: 0.5),
+        borderRadius: BorderRadius.circular(0),
       ),
-      cancel: TextButton(
-        onPressed: () => Get.back(),
-        child: const Text('CANCEL'),
+      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+      child: ListTile(
+        leading: Icon(Icons.hotel_sharp, size: 40, color: Colors.blue),
+        title: Text(
+          pharmacy.name,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Text(pharmacy.address),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () {
+          // Navigate to pharmacy details
+          // Get.toNamed(RouteClass.getPharmacyDetailsRoute(), arguments: pharmacy.id);
+        },
       ),
     );
   }

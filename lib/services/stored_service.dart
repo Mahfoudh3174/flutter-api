@@ -35,5 +35,8 @@ User? getUser() {
   }
   return null;
 }
+  void clearUser() async {
+    await _prefs.remove('user');
+  }
 
 }

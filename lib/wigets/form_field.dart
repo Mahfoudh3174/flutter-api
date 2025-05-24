@@ -2,17 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class CustomFormField extends StatelessWidget {
-  final Widget child;
-  TextEditingController controller = TextEditingController();
+  
+ final  TextEditingController controller ;
   final TextInputType keyboardType;
   final String label;
   final String? Function(String?)? validator;
   IconData icon;
-  bool obscureText = false;
+
   CustomFormField({
     Key? key,
-    required this.child,
-    this.obscureText = false,
+
     required this.controller,
     required this.keyboardType,
     required this.label,
@@ -23,7 +22,7 @@ class CustomFormField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      obscureText: obscureText,
+
       controller: controller,
       keyboardType: keyboardType,
       decoration: InputDecoration(
