@@ -48,14 +48,7 @@ class HomePage extends GetView<PharmacyController> {
             ),
           ),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            // Navigate to add pharmacy screen
-            // Get.toNamed(RouteClass.getAddPharmacyRoute());
-          },
-          child: const Icon(Icons.add),
-        ),
-      ),
+       ),
     );
   }
 }
@@ -68,6 +61,7 @@ class PharmacyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      
       elevation: 0,
       shape: RoundedRectangleBorder(
         side: const BorderSide(color: Colors.grey, width: 0.5),
@@ -84,6 +78,7 @@ class PharmacyCard extends StatelessWidget {
         trailing: const Icon(Icons.chevron_right),
         onTap: () {
           // Navigate to pharmacy details
+          Get.toNamed(RouteClass.getMedictionRoute(), arguments: pharmacy.id);
           // Get.toNamed(RouteClass.getPharmacyDetailsRoute(), arguments: pharmacy.id);
         },
       ),
