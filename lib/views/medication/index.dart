@@ -4,10 +4,48 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:demo/controllers/medication/medication_controller.dart';
 
-class MedicationListView extends StatelessWidget {
-  final MedicationController medicationController = Get.find();
-
+class MedicationListView extends StatefulWidget {
   MedicationListView({super.key});
+  @override
+  State<MedicationListView> createState() => _MedicationListViewState();
+}
+
+class _MedicationListViewState extends State<MedicationListView> {
+  final MedicationController medicationController = Get.find();
+  late final ScrollController scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    scrollController = ScrollController();
+    scrollController.addListener(_onScroll);
+    // Initial load
+    medicationController.loadMedications();
+  }
+
+  void _onScroll() {
+    if (!scrollController.hasClients) return;
+
+    final maxScroll = scrollController.position.maxScrollExtent;
+    final currentScroll = scrollController.position.pixels;
+    final delta =
+        MediaQuery.of(context).size.height *
+        0.2; // Load more when within 20% of the bottom
+
+    if (maxScroll - currentScroll <= delta &&
+        !medicationController.isLoading.value &&
+        !medicationController.isLoadingMore.value &&
+        medicationController.hasMore.value) {
+      medicationController.loadMedications(loadMore: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    scrollController.removeListener(_onScroll);
+    scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,22 +100,44 @@ class MedicationListView extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        return GridView.builder(
-          padding: const EdgeInsets.all(8),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 2,
-            mainAxisSpacing: 16,
-            childAspectRatio: 0.75,
-          ),
-          itemCount: medicationController.medications.length,
-          itemBuilder: (context, index) {
-            final medication = medicationController.medications[index];
-            return MedicationCard(
-              medication: medication,
-              onAddToCart: () => medicationController.addToCart(medication),
-            );
+        return RefreshIndicator(
+          onRefresh: () async {
+            await medicationController.loadMedications(loadMore: false);
           },
+          child: Column(
+            children: [
+              Expanded(
+                child: GridView.builder(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 2,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.75,
+                  ),
+                  itemCount: medicationController.medications.length,
+                  itemBuilder: (context, index) {
+                    final medication = medicationController.medications[index];
+                    return MedicationCard(
+                      medication: medication,
+                      onAddToCart:
+                          () => medicationController.addToCart(medication),
+                    );
+                  },
+                ),
+              ),
+              Obx(
+                () =>
+                    medicationController.isLoadingMore.value
+                        ? const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        )
+                        : const SizedBox.shrink(),
+              ),
+            ],
+          ),
         );
       }),
     );
