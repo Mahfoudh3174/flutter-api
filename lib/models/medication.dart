@@ -9,7 +9,8 @@ class Medication {
   // final String imageUrl ;
   final int? price;
   final int? quantity;
-
+  final int? pivotQuantity;
+  final int? totalPrice;
   Medication({
     required this.id,
     required this.name,
@@ -19,6 +20,8 @@ class Medication {
     required this.strength,
     required this.price,
     required this.quantity,
+    this.pivotQuantity,
+    this.totalPrice,
   });
 
   Medication copyWith({
@@ -46,17 +49,30 @@ class Medication {
     'name': name,
     'category': category?.toJson(),
     'dosageForm': dosageForm,
-    'strength': strength,
     'price': price,
     'quantity': quantity,
   };
   Medication.fromJson(Map<String, dynamic> json)
-    : id = json['id'],
-      name = json['name'],
-      category = Category.fromJson(json['category']),
+    : id = json['id'] ?? 0,
+      name = json['name'] ?? 'Unknown Medication',
+      category = Category.fromJson(json['category '] ?? {}),
       // imageUrl = json['imageUrl'] ?? 'https://via.placeholder.com/150',
-      dosageForm = json['dosageForm'],
-      strength = json['strength'],
-      price = json['price'],
-      quantity = json['quantity'];
+      dosageForm = json['dosageForm'] ?? 'Unknown Dosage Form',
+      strength = json['strength'] ?? 'Unknown Strength',
+      price = json['price'] ?? 0,
+      pivotQuantity=0,
+      totalPrice = 0,
+      quantity = json['quantity'] ?? 0;
+
+  Medication.fromJsonBasic(Map<String, dynamic> json)
+    : id = json['id'] ?? 0,
+      name = json['name'] ?? 'Unknown Medication',
+      category = null,
+      // imageUrl = json['imageUrl'] ?? 'https://via.placeholder.com/150',
+      dosageForm = json['dosage_form'] ?? 'Unknown Dosage Form',
+      strength = null,
+      price = json['price'] ?? 0,
+      pivotQuantity = json['pivot_quantity'] ?? 0,
+      totalPrice = json['total_price'] ?? 0,
+      quantity = 0;
 }

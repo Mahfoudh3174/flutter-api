@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:demo/models/medication.dart';
@@ -50,12 +51,9 @@ class MedicationController extends GetxController {
         for (var med in meds) {
           medications.add(Medication.fromJson(med));
         }
-        print('Loaded ${medications.length} medications');
 
         nextCursor.value = data['meta']['next_cursor'] ?? '';
         hasMore.value = data['meta']['has_more'];
-        print('Next cursor: ${nextCursor.value}');
-        print('Has more: ${hasMore.value}');
       }
     } catch (e) {
       Get.snackbar('Error', e.toString());
@@ -79,7 +77,6 @@ class MedicationController extends GetxController {
     }
 
     cartItems.refresh();
-    Get.snackbar('Added', '${medication.name} added to cart');
   }
 
   double get totalCartValue {
@@ -87,6 +84,46 @@ class MedicationController extends GetxController {
       0,
       (sum, item) => sum + ((item.price ?? 0) * (item.quantity ?? 0)),
     );
+  }
+
+  Future<void> confirmOrder() async {
+    if (cartItems.isEmpty) {
+      Get.snackbar(
+        'Cart Empty',
+        'Please add items to your cart before ordering.',
+      );
+      return;
+    }
+
+    final token = storage.getToken();
+    final url = 'http://192.168.100.4:8000/api/orders';
+    Get.dialog(
+      const Center(child: CircularProgressIndicator()),
+      barrierDismissible: false,
+    );
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'medications': cartItems,
+        'pharmacy_id': pharmacyId,
+        'total': totalCartValue,
+      }),
+    );
+    Get.back();
+    debugPrint('Status Code========: ${response.statusCode}');
+    debugPrint('Response=========: ${response.body}');
+
+    if (response.statusCode == 200) {
+      Get.snackbar('Order Placed', 'Your order has been placed successfully.');
+      cartItems.clear();
+    } else {
+      Get.snackbar('Error', 'Failed to place order. Please try again.');
+    }
   }
 
   @override

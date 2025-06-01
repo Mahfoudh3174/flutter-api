@@ -1,8 +1,8 @@
 
 class Category {
 
-  final int id;
-  final String name;
+  final int? id;
+  final String? name;
 
 
   Category({
@@ -17,7 +17,7 @@ class Category {
         
       };
   Category.fromJson(Map<String, dynamic> json)
-      : id = json['id'],
-        name = json['name'];
+      : id = json['id'] ?? 0,
+        name = json['name'] ?? 'Unknown Category';
   
 }
