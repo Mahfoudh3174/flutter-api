@@ -14,7 +14,7 @@ class MedicationListView extends StatefulWidget {
 class _MedicationListViewState extends State<MedicationListView> {
   final MedicationController medicationController = Get.find();
   late final ScrollController scrollController;
-  final double _scrollThreshold = 200.0; // pixels from bottom to trigger load
+  final double _scrollThreshold = 200.0;
 
   @override
   void initState() {
@@ -31,8 +31,9 @@ class _MedicationListViewState extends State<MedicationListView> {
   void _onScroll() {
     if (!scrollController.hasClients ||
         medicationController.isLoadingMore.value ||
-        !medicationController.hasMore.value)
+        !medicationController.hasMore.value) {
       return;
+    }
 
     final maxScroll = scrollController.position.maxScrollExtent;
     final currentScroll = scrollController.position.pixels;
@@ -128,6 +129,27 @@ class _MedicationListViewState extends State<MedicationListView> {
         if (medicationController.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
+        if (medicationController.medications.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.medication_outlined,
+                  size: 64,
+                  color: Colors.grey,
+                ),
+                const SizedBox(height: 16),
+                const Text('No medications found'),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => medicationController.loadMedications(),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          );
+        }
         return _buildMedicationList();
       }),
     );
@@ -174,7 +196,8 @@ class _MedicationListViewState extends State<MedicationListView> {
                             crossAxisCount: 2,
                             crossAxisSpacing: 16,
                             mainAxisSpacing: 16,
-                            childAspectRatio: 0.75,
+                            childAspectRatio:
+                                0.72, // Adjusted to prevent overflow
                           ),
                     );
                   }),
@@ -218,65 +241,111 @@ class MedicationCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Bigger image section (55% of card height)
           Expanded(
+            flex: 55,
             child: Container(
-              color: Colors.blue[50],
-              child: Icon(_defaultIcon, size: 60, color: Colors.blue[300]),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Colors.blue[50]!, Colors.blue[100]!],
+                ),
+              ),
+              child: _buildMedicationImage(),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  medication.name ?? 'Unknown Medication',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  medication.category?.name ?? 'No category',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Text(
-                      '\$${medication.price?.toStringAsFixed(2) ?? '0.00'}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                      ),
-                    ),
-                    const Spacer(),
-                    SizedBox(
-                      height: 36,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
+          // Content section (30% of card height)
+          Expanded(
+            flex: 30,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          medication.name ?? 'Unknown Medication',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        onPressed: onAddToCart,
-                        child: const Text('Add'),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
+                  // Price display
+                  Text(
+                    "${medication.price?.toStringAsFixed(2)} MRU",
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Add to cart button at bottom (15% of card height)
+          Expanded(
+            flex: 15,
+            child: Container(
+              margin: const EdgeInsets.fromLTRB(6, 0, 6, 6),
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 0,
+                  ),
+                  minimumSize: const Size(0, 32),
                 ),
-              ],
+                onPressed: onAddToCart,
+                icon: const Icon(Icons.shopping_cart, size: 14),
+                label: const Text(
+                  'Add',
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                ),
+              ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildMedicationImage() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      child: Image.network(
+              "http://192.168.100.4:8000/storage/${medication.imageUrl!}",
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) {
+          print('Image load error: $error');
+          return _buildDefaultIcon();
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return const Center(child: CircularProgressIndicator());
+        },
+      ),
+    );
+  }
+
+  Widget _buildDefaultIcon() {
+    return Center(child: Icon(_defaultIcon, size: 80, color: Colors.blue[300]));
   }
 }

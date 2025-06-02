@@ -6,7 +6,7 @@ class Medication {
   final Category? category;
   final String? dosageForm;
   final String? strength;
-  // final String imageUrl ;
+  final String? imageUrl ;
   final int? price;
   final int? quantity;
   final int? pivotQuantity;
@@ -15,7 +15,7 @@ class Medication {
     required this.id,
     required this.name,
     required this.category,
-    // required this.imageUrl,
+    required this.imageUrl,
     required this.dosageForm,
     required this.strength,
     required this.price,
@@ -39,7 +39,7 @@ class Medication {
       strength: strength,
       name: name ?? this.name,
       price: price ?? this.price,
-      // imageUrl: imageUrl ?? this.imageUrl,
+      imageUrl: imageUrl ?? 'https://via.placeholder.com/150',
       quantity: quantity ?? this.quantity,
     );
   }
@@ -55,12 +55,12 @@ class Medication {
   Medication.fromJson(Map<String, dynamic> json)
     : id = json['id'] ?? 0,
       name = json['name'] ?? 'Unknown Medication',
-      category = Category.fromJson(json['category '] ?? {}),
-      // imageUrl = json['imageUrl'] ?? 'https://via.placeholder.com/150',
+      category = Category.fromJson(json['category'] ?? {}),
+      imageUrl = json['imageUrl'] ,
       dosageForm = json['dosageForm'] ?? 'Unknown Dosage Form',
       strength = json['strength'] ?? 'Unknown Strength',
       price = json['price'] ?? 0,
-      pivotQuantity=0,
+      pivotQuantity = 0,
       totalPrice = 0,
       quantity = json['quantity'] ?? 0;
 
@@ -68,7 +68,7 @@ class Medication {
     : id = json['id'] ?? 0,
       name = json['name'] ?? 'Unknown Medication',
       category = null,
-      // imageUrl = json['imageUrl'] ?? 'https://via.placeholder.com/150',
+      imageUrl = null,
       dosageForm = json['dosage_form'] ?? 'Unknown Dosage Form',
       strength = null,
       price = json['price'] ?? 0,

@@ -1,5 +1,7 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:demo/models/medication.dart';
@@ -48,8 +50,11 @@ class MedicationController extends GetxController {
         if (!loadMore) medications.clear();
 
         List<dynamic> meds = data['medications'];
+
         for (var med in meds) {
+          debugPrint('Adding medication: ${med['imageUrl']}');
           medications.add(Medication.fromJson(med));
+          print("=========${medications.first.imageUrl!}");
         }
 
         nextCursor.value = data['meta']['next_cursor'] ?? '';
@@ -94,6 +99,14 @@ class MedicationController extends GetxController {
       );
       return;
     }
+    Position? position = await getCurrentLocationApp();
+    if (position == null) {
+      Get.snackbar(
+        'Location Error',
+        'Unable to retrieve your current location. Please enable location services.',
+      );
+      return;
+    }
 
     final token = storage.getToken();
     final url = 'http://192.168.100.4:8000/api/orders';
@@ -112,6 +125,8 @@ class MedicationController extends GetxController {
         'medications': cartItems,
         'pharmacy_id': pharmacyId,
         'total': totalCartValue,
+        'latitude': position.latitude,
+        'longitude': position.longitude,
       }),
     );
     Get.back();
@@ -124,6 +139,56 @@ class MedicationController extends GetxController {
     } else {
       Get.snackbar('Error', 'Failed to place order. Please try again.');
     }
+  }
+
+  Future<Position?> getCurrentLocationApp() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+    try {
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+
+      if (!serviceEnabled) {
+        // Location services are disabled, handle accordingly
+        Get.snackbar(
+          "Error",
+          "Location services are disabled please enable them",
+          backgroundColor: Colors.red,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+
+        return null;
+      }
+
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          // Permissions are denied, handle accordingly
+          throw LocationServiceDisabledException();
+        }
+      }
+      if (permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always) {
+        Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        );
+        debugPrint("Permission granted");
+        debugPrint(
+          "Current Position: ${position.latitude}, ${position.longitude}",
+        );
+        return position;
+      }
+      return null;
+    } catch (e) {
+      Get.snackbar(
+        "Error",
+        e.toString(),
+        backgroundColor: Colors.red,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+    return null;
   }
 
   @override

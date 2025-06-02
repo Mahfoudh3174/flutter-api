@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:demo/controllers/medication/medication_controller.dart';
 import 'package:demo/models/medication.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,6 @@ class CardPage extends GetView<MedicationController> {
     return Container(
       decoration: _buildBackgroundDecoration(context),
       child: Obx(() {
-        // Minimal rebuild scope - only watches cartItems.isEmpty
         if (controller.cartItems.isEmpty) {
           return _buildEmptyCart();
         }
@@ -75,7 +75,6 @@ class CardPage extends GetView<MedicationController> {
   Widget _buildCartContent() {
     return Column(
       children: [
-        // Cart items list with separate OBX for minimal rebuilds
         Expanded(
           child: Obx(() {
             final items = controller.cartItems;
@@ -88,7 +87,6 @@ class CardPage extends GetView<MedicationController> {
             );
           }),
         ),
-        // Total and checkout section
         _buildCheckoutSection(),
       ],
     );
@@ -105,7 +103,19 @@ class CardPage extends GetView<MedicationController> {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            Icon(Icons.medical_services, size: 36, color: Colors.blue[300]),
+            // Medication Image
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: _buildMedicationImage(medication.imageUrl),
+              ),
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -137,6 +147,25 @@ class CardPage extends GetView<MedicationController> {
       ),
     );
   }
+
+  Widget _buildMedicationImage(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return Center(
+        child: Icon(Icons.medical_services, size: 30, color: Colors.blue[300]),
+      );
+    }
+
+    return Image.network(
+      "http://192.168.100.4:8000/storage/$imageUrl",
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        print('Error loading image: $error');
+        return Center(
+          child: Icon(Icons.error, size: 30, color: Colors.red[300]),
+        );
+      },
+    );
+     }
 
   void _showRemoveDialog(int index) {
     Get.defaultDialog(
