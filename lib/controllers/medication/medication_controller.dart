@@ -68,10 +68,19 @@ class MedicationController extends GetxController {
     }
   }
 
-  void addToCart(Medication medication) {
+  void addToCart(Medication medication) async {
     final existingIndex = cartItems.indexWhere(
       (item) => item.id == medication.id,
     );
+    //check availability of medication
+    if (existingIndex >= 0 &&
+        (cartItems[existingIndex].quantity ?? 0) >=
+            (medication.quantity ?? 0)) {
+      Get.snackbar('Out of Stock', 'This medication is out of stock.');
+      medications.removeAt(medication.id!);
+      await loadMedications();
+      return;
+    }
 
     if (existingIndex >= 0) {
       cartItems[existingIndex] = cartItems[existingIndex].copyWith(
@@ -136,8 +145,12 @@ class MedicationController extends GetxController {
     if (response.statusCode == 200) {
       Get.snackbar('Order Placed', 'Your order has been placed successfully.');
       cartItems.clear();
+      await loadMedications();
     } else {
-      Get.snackbar('Error', 'Failed to place order. Please try again.');
+      Get.snackbar(
+        'Error',
+        json.decode(response.body)['message'] ?? 'Failed to place order.',
+      );
     }
   }
 
